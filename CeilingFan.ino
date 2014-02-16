@@ -18,13 +18,13 @@
 // I no longer use the next definition, since I've modified this to use 3 servos.  I'm keeping it to remind me which pins are usable.
 //#define ServoPIN  9  // Can be changed 3,5,6,9,10,11
 // The minimum and maximum values may need to be adjusted for each servo.  The theoretical range is from 0 to 180.
-#define ServoMIN  0    // This will be the lower value for all servos, 0 is the absolute floor.
-#define ServoMAX  180  // This will be the higher value for all servos, 180 is the absolute ceiling.
-#define Servo3MIN 70   // This will be the minimum value servo 3 will move to.  This is how high the arm moves up.  Port servo.
+#define ServoMIN  0     // This will be the lower value for all servos, 0 is the absolute floor.
+#define ServoMAX  180   // This will be the higher value for all servos, 180 is the absolute ceiling.
+#define Servo3MIN 70    // This will be the minimum value servo 3 will move to.  This is how high the arm moves up.  Port servo.
 #define Servo3MAX 160   // This will be the maximum value servo 3 will move to.  This is how low the arm moves down.  Port servo.
-#define Servo6MIN 40   // This will be the minimum value servo 6 will move to.  This is how low the arm moves down.  Starboard servo.
-#define Servo6MAX 120   // This will be the maximum value servo 6 will move to.  This is how high the arm moves up.  Starboard servo.
-#define Servo9MIN 50   // This will be the minimum value servo 9 will move to.  This is how high the arm moves up.  Rear servo.
+#define Servo6MIN 20    // This will be the minimum value servo 6 will move to.  This is how low the arm moves down.  A smaller number results in a lower stopping point.  Starboard servo.
+#define Servo6MAX 110   // This will be the maximum value servo 6 will move to.  This is how high the arm moves up.  Starboard servo.
+#define Servo9MIN 70    // This will be the minimum value servo 9 will move to.  This is how high the arm moves up.  A larger number results in less upward vertical travel.  Rear servo.
 #define Servo9MAX 150   // This will be the maximum value servo 9 will move to.  This is how low the arm moves down.  Rear servo.
 
 /*-----( Declare objects )-----*/
