@@ -11,8 +11,10 @@
  - V1.02 02/11/13
  Questions: terry@yourduino.com */
 
+
 /*-----( Import needed libraries )-----*/
 #include <Servo.h>  // Comes with Arduino IDE
+
 
 /*-----( Declare Constants and Pin Numbers )-----*/
 // I no longer use the next definition, since I've modified this to use 3 servos.  I'm keeping it to remind me which pins are usable.
@@ -27,6 +29,7 @@
 #define Servo9MIN 70    // This will be the minimum value servo 9 will move to.  This is how high the arm moves up.  A larger number results in less upward vertical travel.  Rear servo.
 #define Servo9MAX 150   // This will be the maximum value servo 9 will move to.  This is how low the arm moves down.  Rear servo.
 
+
 /*-----( Declare objects )-----*/
 // create servo objects to control servos
 // a maximum of eight servo objects can be created
@@ -40,10 +43,10 @@ int invpos = 0;    // This is an inverted position to accomodate servo reversing
 
 void setup()   /****** SETUP: RUNS ONCE ******/
 {
-//  myservo.attach(ServoPIN);  // attaches the servo on pin 9 to the servo object 
+//  myservo.attach(ServoPIN);  // attaches the servo on pin 9 to the servo object.
   MyServo3.attach(3);  // Attach MyServo3 to pin 3.
-  MyServo6.attach(6);  // Attach MyServo3 to pin 6.
-  MyServo9.attach(9);  // Attach MyServo3 to pin 9.
+  MyServo6.attach(6);  // Attach MyServo6 to pin 6.
+  MyServo9.attach(9);  // Attach MyServo9 to pin 9.
 
 }//--(end setup )---
 
