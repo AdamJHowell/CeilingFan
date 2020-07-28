@@ -21,6 +21,7 @@
 
 
 /*-----( Import needed libraries )-----*/
+#include <Arduino.h>
 #include <Servo.h>  // Comes with Arduino IDE
 
 
@@ -46,56 +47,74 @@ Servo MyServo6;    // Servo object for pin 6.
 Servo MyServo9;    // Servo object for pin 9.
 /*-----( Declare Variables )-----*/
 int pos = 0;       // variable to store the servo position
-int invpos = 0;    // This is an inverted position to accomodate servo reversing, e.g. servo's on the opposite side of the craft.
+int invertPos = 0;    // This is an inverted position to accommodate servo reversing, e.g. servo's on the opposite side of the craft.
 
 
-void setup()   /****** SETUP: RUNS ONCE ******/
+void setup()
 {
-	//  myservo.attach(ServoPIN);  // attaches the servo on pin 9 to the servo object.
-	MyServo3.attach(3);  // Attach MyServo3 to pin 3.
-	MyServo6.attach(6);  // Attach MyServo6 to pin 6.
-	MyServo9.attach(9);  // Attach MyServo9 to pin 9.
+  //  MyServo.attach(ServoPIN);  // attaches the servo on pin 9 to the servo object.
+  MyServo3.attach( 3 );  // Attach MyServo3 to pin 3.
+  MyServo6.attach( 6 );  // Attach MyServo6 to pin 6.
+  MyServo9.attach( 9 );  // Attach MyServo9 to pin 9.
 
-}//--(end setup )---
+} // End of setup().
 
 
-void loop()   /****** LOOP: RUNS CONSTANTLY ******/
+void loop()
 {
-	for ( pos = ServoMIN; pos < ServoMAX; pos += 1 )   // Count from our minimum value to our maximum value in steps of 1 degree.
-	{
-		if ( pos > Servo3MIN && pos < Servo3MAX )        // This is an upper cap for servo 3.
-		{
-			MyServo3.write(pos);                         // Move the servo to the position in variable 'pos'.
-		}
-		invpos = ServoMAX - pos;                         // Calculate the inveted position by taking the maximum value and subtracting the current postitional value.
-		if ( invpos > Servo6MIN && invpos < Servo6MAX ) // If the left servo goes lower than about 35, it hits the main drive gear, so this prevents that interaction.
-		{
-			MyServo6.write(invpos);                      // Move the servo to the position in variable 'invpos'.
-		}
-		if ( pos > Servo9MIN && pos < Servo9MAX)         // This is an upper cap for servo 9.
-		{
-			MyServo9.write(pos);                         // Move the servo to the position in variable 'pos'.
-		}
-		delay(10);                                       // Wait 10ms for the servo to reach the position.
-	}
-	delay(1000);
-	for ( pos = ServoMAX; pos > ServoMIN; pos -= 1 )   // Count from our maximum value to our minimum value in steps of 1 degree.
-	{
-		if ( pos > Servo3MIN && pos < Servo3MAX )        // This is an upper cap for servo 3.
-		{
-			MyServo3.write(pos);                         // Move the servo to the position in variable 'pos'.
-		}
-		invpos = ServoMAX - pos;                         // Calculate the inveted position by taking the maximum value and subtracting the current postitional value.
-		if ( invpos > Servo6MIN && invpos < Servo6MAX ) // If the left servo goes lower than about 35, it hits the main drive gear, so this prevents that interaction.
-		{
-			MyServo6.write(invpos);                      // Move the servo to the position in variable 'invpos'.
-		}
-		if ( pos > Servo9MIN && pos < Servo9MAX)         // This is an upper cap for servo 9.
-		{
-			MyServo9.write(pos);                         // Move the servo to the position in variable 'pos'.
-		}
-		delay(10);                                       // Wait 10ms for the servo to reach the position.
-	}
-	delay(1000);
+  // Count from our minimum value to our maximum value in steps of 1 degree.
+  for( pos = ServoMIN; pos < ServoMAX; pos += 1 )
+  {
+    // This is an upper cap for servo 3.
+    if( pos > Servo3MIN && pos < Servo3MAX )
+    {
+      // Move the servo to the position in variable 'pos'.
+      MyServo3.write( pos );
+    }
+    // Calculate the inverted position by taking the maximum value and subtracting the current positional value.
+    invertPos = ServoMAX - pos;
+    // If the left servo goes lower than about 35, it hits the main drive gear, so this prevents that interaction.
+    if( invertPos > Servo6MIN && invertPos < Servo6MAX )
+    {
+      // Move the servo to the position in variable 'invertPos'.
+      MyServo6.write( invertPos );
+    }
+    // This is an upper cap for servo 9.
+    if( pos > Servo9MIN && pos < Servo9MAX )
+    {
+      // Move the servo to the position in variable 'pos'.
+      MyServo9.write( pos );
+    }
+    // Wait 10ms for the servo to reach the position.
+    delay( 10 );
+  }
+  delay( 1000 );
+  // Count from our maximum value to our minimum value in steps of 1 degree.
+  for( pos = ServoMAX; pos > ServoMIN; pos -= 1 )
+  {
+    // This is an upper cap for servo 3.
+    if( pos > Servo3MIN && pos < Servo3MAX )
+    {
+      // Move the servo to the position in variable 'pos'.
+      MyServo3.write( pos );
+    }
+    // Calculate the inverted position by taking the maximum value and subtracting the current positional value.
+    invertPos = ServoMAX - pos;
+    // If the left servo goes lower than about 35, it hits the main drive gear, so this prevents that interaction.
+    if( invertPos > Servo6MIN && invertPos < Servo6MAX )
+    {
+      // Move the servo to the position in variable 'invertPos'.
+      MyServo6.write( invertPos );
+    }
+    // This is an upper cap for servo 9.
+    if( pos > Servo9MIN && pos < Servo9MAX )
+    {
+      // Move the servo to the position in variable 'pos'.
+      MyServo9.write( pos );
+    }
+    // Wait 10ms for the servo to reach the position.
+    delay( 10 );
+  }
+  delay( 1000 );
 
-}//--(end main loop )---
+}// End of loop.
