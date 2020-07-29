@@ -142,7 +142,7 @@ void floodLightChange( int receivedValue )
   // Note that some boards consider 'HIGH' to be off.
   if ( receivedValue == 0 )
     digitalWrite( LED_BUILTIN, HIGH );    // Turn the LED off.
-  if ( receivedValue == 1 )
+  else
     digitalWrite( LED_BUILTIN, LOW );     // Turn the LED on.
 } // End of floodLightChange() function.
 
