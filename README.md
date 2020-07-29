@@ -26,7 +26,7 @@ If separate wires:
  - Servo Red or Orange (center wire) to +5V
  - Servo White or Yellow to signal
 
-##API
+**API**
 
 The API for this project is a simple two-character string, where the first character is a key designating the device to be controlled, and the second character (a digit) is a value representing the setting for that device.
 For lighting, zero extinguishes the light, and any non-zero value will turn the light on.
