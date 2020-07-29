@@ -4,7 +4,11 @@ This project uses an Arduino to control an inexpensive radio-controlled helicopt
 
 My intent is to use this as a ceiling fan, with a 450-class electric helicopter fastened upside down to the ceiling.  I can then control the helicopter using MQTT.
 
+This would also work well as a bench test for any radio-controlled project.
+
 https://github.com/AdamJHowell
+
+###Setup
 
 **Hardware:**
  - HiLetgo ESP8266 NodeMCU ESP-12E
@@ -18,18 +22,18 @@ https://github.com/AdamJHowell
  - Hookup wire (various)
 
 **CONNECTIONS:**
- - Cyclic/Collective Pitch Mixing (CCPM) Servos plugged into digital pins D2, D3, and D4.
- - ESC plugged into digital pin D0.
+ - Cyclic/Collective Pitch Mixing (CCPM) Servos plugged into digital pins D2, D3, and D4
+ - ESC plugged into digital pin D0
+ - Rudder servo plugged into digital pin D1
+ - Connect black or brown servo wires to ground
+ - Connect red servo wires to +5V
+ - Connect white, orange, or yellow servo wires to signal
+ - Ensure the ESC is provided enough amperage
 
-If separate wires:
- - Servo Black or Brown to ground.
- - Servo Red or Orange (center wire) to +5V
- - Servo White or Yellow to signal
-
-**API**
+###API
 
 The API for this project is a simple two-character string, where the first character is a key designating the device to be controlled, and the second character (a digit) is a value representing the setting for that device.
-For lighting, zero extinguishes the light, and any non-zero value will turn the light on.
+For lighting, zero extinguishes the light, and any non-zero value will illuminate the light.
 
 **First character:**
  - t = throttle servo
@@ -54,4 +58,4 @@ For lighting, zero extinguishes the light, and any non-zero value will turn the 
 | 8 | on (LEDs) | 160° from CCW position (servos) | 88% of maximum speed (ESC) |
 | 9 | on (LEDs) | maximum CW position (servos) | maximum speed (ESC) |
 
-For most servos, the 0-9 value is multiplied by 20 to put it in a 0-180 range needed for the Arduino servo API.
+For servos, the 0-9 API value is multiplied by 20 to put it in a 0-180 range needed for the Arduino servo API.

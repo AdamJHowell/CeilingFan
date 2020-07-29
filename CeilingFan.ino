@@ -82,7 +82,7 @@ int moveServo( Servo thisServo, int curPos, int newPos )
       for ( ; curPos < newPos; curPos++ )
       {
         thisServo.write( curPos );
-        delay( 10 );                // This delay is crucial!
+        delay( 15 );
       }
     }
     else
@@ -90,10 +90,11 @@ int moveServo( Servo thisServo, int curPos, int newPos )
       for ( ; curPos > newPos; curPos-- )
       {
         thisServo.write( curPos );
-        delay( 10 );                // This delay is crucial!
+        delay( 15 );
       }
     }
   }
+  delay( 100 );   // This delay may need to be tweaked, and may vary from servo to servo.
   return newPos;
 } // End of moveServo() function.
 
