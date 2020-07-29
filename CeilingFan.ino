@@ -39,6 +39,11 @@ const char* password = "8012254722";
 const char* mqttServer = "192.168.55.200";
 const int mqttPort = 2112;
 const char* mqttTopic = "mqttServo";
+int throttlePos = 0;
+int rudderPos = 90;
+int collective1Pos = 90;
+int collective2Pos = 90;
+int collective3Pos = 90;
 
 WiFiClient espClient;
 PubSubClient mqttClient( espClient );
@@ -49,27 +54,47 @@ Servo collective2Servo; // Create servo object to control one of the three colle
 Servo collective3Servo; // Create servo object to control one of the three collective servos.
 
 
-void moveServo( Servo thisServo, int position )
+/**
+ * moveServo() reads the current position, and gradually moves the servo to the new position.
+ */
+int moveServo( Servo thisServo, int curPos, int newPos )
 {
-  if ( position < 0 )           // Check for an invalid value.
+  if ( newPos < 0 )               // Check for an invalid value.
   {
     Serial.print( "moveServo() was given an invalid servo position: " );
-    Serial.println( position );
-    position = 5;               // Set the servo to a low, but valid, position.
+    Serial.println( newPos );
+    newPos = 5;                   // Set the servo to a low, but valid, position.
   }
-  else if ( position > 180 )    // Check for an invalid value.
+  else if ( newPos > 180 )        // Check for an invalid value.
   {
     Serial.print( "moveServo() was given an invalid servo position: " );
-    Serial.println( position );
-    position = 175;             // Set the servo to a low, but valid, position.
+    Serial.println( newPos );
+    newPos = 175;                 // Set the servo to a low, but valid, position.
   }
   else
   {
-    Serial.print( "\nMoving to position " );
-    Serial.println( position );
-    thisServo.write( position );               // Move the servo.
-    delay( 300 );   // This delay is crucial!
+    Serial.print( "\nMoving from " );
+    Serial.print( curPos );
+    Serial.print( " to " );
+    Serial.println( newPos );
+    if ( curPos < newPos )
+    {
+      for ( ; curPos < newPos; curPos++ )
+      {
+        thisServo.write( curPos );
+        delay( 10 );                // This delay is crucial!
+      }
+    }
+    else
+    {
+      for ( ; curPos > newPos; curPos-- )
+      {
+        thisServo.write( curPos );
+        delay( 10 );                // This delay is crucial!
+      }
+    }
   }
+  return newPos;
 } // End of moveServo() function.
 
 
@@ -79,7 +104,7 @@ void moveServo( Servo thisServo, int position )
 void throttleChange( int receivedValue )
 {
   int finalValue = receivedValue * 20;    // Multiply by 20 to scale from 1-9 up to 1-180.
-  moveServo( throttleServo, finalValue );
+  throttlePos = moveServo( throttleServo, throttlePos, finalValue );
 } // End of throttleChange() function.
 
 
@@ -91,9 +116,9 @@ void collectiveChange( int receivedValue )
   int finalValue = receivedValue * 20;
   // ToDo: These next 3 lines may need significant tweaking of finalValue before calling moveServo().
   // Some servos will need finalValue inverted (180 - finalValue).
-  moveServo( collective1Servo, finalValue );
-  moveServo( collective2Servo, finalValue );
-  moveServo( collective3Servo, finalValue );
+  collective1Pos = moveServo( collective1Servo, collective1Pos, finalValue );
+  collective2Pos = moveServo( collective2Servo, collective2Pos, finalValue );
+  collective3Pos = moveServo( collective3Servo, collective3Pos, finalValue );
 } // End of collectiveChange() function.
 
 
@@ -103,7 +128,7 @@ void collectiveChange( int receivedValue )
 void rudderChange( int receivedValue )
 {
   int finalValue = receivedValue * 20;
-  moveServo( rudderServo, finalValue );
+  rudderPos = moveServo( rudderServo, rudderPos, finalValue );
 } // End of rudderChange() function.
 
 
@@ -238,17 +263,17 @@ void reconnect()
 */
 void setup()
 {
-  throttleServo.attach( 16 );     // Attaches the servo on GPIO16 (D0) to the throttle servo object.
-  rudderServo.attach( 5 );        // Attaches the servo on GPIO5 (D1) to the rudder servo object.
-  collective1Servo.attach( 4 );   // Attaches the servo on GPIO4 (D2) to the collective1 servo object.
-  collective2Servo.attach( 0 );   // Attaches the servo on GPIO0 (D3) to the collective2 servo object.
-  collective3Servo.attach( 2 );   // Attaches the servo on GPIO2 (D4) to the collective3 servo object.
-  throttleServo.write( 90 );       // Set the throttle to zero.
-  rudderServo.write( 90 );        // Move the servo to its center position.
-  collective1Servo.write( 90 );   // Move the collective to neutral.
-  collective2Servo.write( 90 );   // Move the collective to neutral.
-  collective3Servo.write( 90 );   // Move the collective to neutral.
-  Serial.begin( 115200 );         // Start the Serial communication to send messages to the computer.
+  throttleServo.attach( 16 );                 // Attaches the servo on GPIO16 (D0) to the throttle servo object.
+  rudderServo.attach( 5 );                    // Attaches the servo on GPIO5 (D1) to the rudder servo object.
+  collective1Servo.attach( 4 );               // Attaches the servo on GPIO4 (D2) to the collective1 servo object.
+  collective2Servo.attach( 0 );               // Attaches the servo on GPIO0 (D3) to the collective2 servo object.
+  collective3Servo.attach( 2 );               // Attaches the servo on GPIO2 (D4) to the collective3 servo object.
+  throttleServo.write( throttlePos );         // Set the throttle to zero.
+  rudderServo.write( rudderPos );             // Move the servo to its center position.
+  collective1Servo.write( collective1Pos );   // Move the collective to neutral.
+  collective2Servo.write( collective2Pos );   // Move the collective to neutral.
+  collective3Servo.write( collective3Pos );   // Move the collective to neutral.
+  Serial.begin( 115200 );                     // Start the Serial communication to send messages to the computer.
   delay( 10 );
   Serial.println( '\n' );
 
