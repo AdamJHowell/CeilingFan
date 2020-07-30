@@ -39,7 +39,12 @@ const char* password = "8012254722";
 const char* mqttServer = "192.168.55.200";
 const int mqttPort = 2112;
 const char* mqttTopic = "mqttServo";
-int throttlePos = 0;
+const int throttlePin = 16;           // Use GPIO16 (D0) for the throttle (ESC).
+const int rudderPin = 5;              // Use GPIO5 (D1) for the rudder.
+const int collective1Pin = 4;         // Use GPIO4 (D2) for the collective1.
+const int collective2Pin = 0;         // Use GPIO0 (D3) for the collective2.
+const int collective3Pin = 2;         // Use GPIO2 (D4) for the collective3.
+int throttlePos = 0;              
 int rudderPos = 90;
 int collective1Pos = 90;
 int collective2Pos = 90;
@@ -264,11 +269,11 @@ void reconnect()
 */
 void setup()
 {
-  throttleServo.attach( 16 );                 // Attaches the servo on GPIO16 (D0) to the throttle servo object.
-  rudderServo.attach( 5 );                    // Attaches the servo on GPIO5 (D1) to the rudder servo object.
-  collective1Servo.attach( 4 );               // Attaches the servo on GPIO4 (D2) to the collective1 servo object.
-  collective2Servo.attach( 0 );               // Attaches the servo on GPIO0 (D3) to the collective2 servo object.
-  collective3Servo.attach( 2 );               // Attaches the servo on GPIO2 (D4) to the collective3 servo object.
+  throttleServo.attach( throttlePin );        // Attach the throttle servo to the appropriate pin.
+  rudderServo.attach( rudderPin );            // Attach the rudder servo to the appropriate pin.
+  collective1Servo.attach( collective1Pin );  // Attach the collective1 servo to the appropriate pin.
+  collective2Servo.attach( collective2Pin );  // Attach the collective2 servo to the appropriate pin.
+  collective3Servo.attach( collective3Pin );  // Attach the collective3 servo to the appropriate pin.
   throttleServo.write( throttlePos );         // Set the throttle to zero.
   rudderServo.write( rudderPos );             // Move the servo to its center position.
   collective1Servo.write( collective1Pos );   // Move the collective to neutral.
