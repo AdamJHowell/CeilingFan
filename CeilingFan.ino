@@ -1,12 +1,12 @@
-/*
-	Ceiling Fan
-	A ceiling fan made from a R/C helicopter.
-	Create 2020-07-28
-	by Adam Howell
-	https://github.com/AdamJHowell
-
-  See the associated README.md for hardware and API information.
-*/
+/**
+ * Ceiling Fan
+ * A ceiling fan made from a R/C helicopter.
+ * Create 2020-07-28
+ * by Adam Howell
+ * https://github.com/AdamJHowell
+ *
+ * See the associated README.md for hardware and API information.
+ */
 
 #include <Servo.h>
 #include <ESP8266WiFi.h>  // Network Client for the WiFi chipset.
@@ -41,8 +41,8 @@ Servo collective2Servo; // Create servo object to control one of the three colle
 Servo collective3Servo; // Create servo object to control one of the three collective servos.
 
 /**
-   moveServo() reads the current position, and gradually moves the servo to the new position.
-*/
+ * moveServo() reads the current position, and gradually moves the servo to the new position.
+ */
 int moveServo(Servo thisServo, int curPos, int newPos)
 {
 	if (newPos < 0) // Check for an invalid value.
@@ -85,8 +85,8 @@ int moveServo(Servo thisServo, int curPos, int newPos)
 } // End of moveServo() function.
 
 /**
-   throttleChange() will handle the scaling and limits needed, and pass real-world values to moveServo().
-*/
+ * throttleChange() will handle the scaling and limits needed, and pass real-world values to moveServo().
+ */
 void throttleChange(int receivedValue)
 {
 	int finalValue = receivedValue * 20; // Multiply by 20 to scale from 1-9 up to 1-180.
@@ -94,21 +94,22 @@ void throttleChange(int receivedValue)
 } // End of throttleChange() function.
 
 /**
-   collectiveChange() will handle the scaling and limits needed, and pass real-world values to moveServo().
-*/
+ * collectiveChange() will handle the scaling and limits needed, and pass real-world values to moveServo().
+ */
 void collectiveChange(int receivedValue)
 {
 	int finalValue = receivedValue * 20;
 	// ToDo: These next 3 lines may need significant tweaking of finalValue before calling moveServo().
 	// Some servos will need finalValue inverted (180 - finalValue).
+	// These moves happen sequentially (1, 2, 3), not simultaneously.
 	collective1Pos = moveServo(collective1Servo, collective1Pos, finalValue);
 	collective2Pos = moveServo(collective2Servo, collective2Pos, finalValue);
 	collective3Pos = moveServo(collective3Servo, collective3Pos, finalValue);
 } // End of collectiveChange() function.
 
 /**
-   rudderChange() will handle the scaling and limits needed, and pass real-world values to moveServo().
-*/
+ * rudderChange() will handle the scaling and limits needed, and pass real-world values to moveServo().
+ */
 void rudderChange(int receivedValue)
 {
 	int finalValue = receivedValue * 20;
@@ -116,10 +117,8 @@ void rudderChange(int receivedValue)
 } // End of rudderChange() function.
 
 /**
-   floodLightChange() will toggle the floodlights on or off.
-   ~~~Presently, this will only toggle the on-board LED~~~
-   ToDo: Change this to whichever GPIO pin will eventually drive the floodlight LEDs.
-*/
+ * floodLightChange() will toggle the floodlights on or off.
+ */
 void floodLightChange(int receivedValue)
 {
 	// Note that some boards consider 'HIGH' to be off.
@@ -129,20 +128,50 @@ void floodLightChange(int receivedValue)
 		digitalWrite(floodLEDPin, LOW); // Turn the LED on.
 } // End of floodLightChange() function.
 
+/**
+ * tlofLightChange() will toggle the Touchdown Liftoff lights on or off.
+ */
 void tlofLightChange(int receivedValue)
 {
-
+	// Note that some boards consider 'HIGH' to be off.
+	if (receivedValue == 0)
+		digitalWrite(tlofLEDPin, HIGH); // Turn the LED off.
+	else
+		digitalWrite(tlofLEDPin, LOW); // Turn the LED on.
 } // End of tlofLightChange() function.
 
+/**
+ * fatoLightChange() will toggle the Final Approach Liftoff lights on or off.
+ */
 void fatoLightChange(int receivedValue)
 {
-
+	// Note that some boards consider 'HIGH' to be off.
+	if (receivedValue == 0)
+		digitalWrite(fatoLEDPin, HIGH); // Turn the LED off.
+	else
+		digitalWrite(fatoLEDPin, LOW); // Turn the LED on.
 } // End of fatoLightChange() function.
 
 /**
-   callback() handles MQTT subscriptions.
-   When a message comes in on a topic we have subscribed to, this function is executed.
-*/
+ * killSwitch() will turn everything off.
+ */
+void killSwitch()
+{
+	throttlePos = moveServo(throttleServo, throttlePos, 0); // Turn the ESC on.
+	digitalWrite(floodLEDPin, LOW);								  // Turn the LED on.
+	digitalWrite(tlofLEDPin, LOW);								  // Turn the LED on.
+	digitalWrite(fatoLEDPin, LOW);								  // Turn the LED on.
+	rudderPos = moveServo(rudderServo, rudderPos, 90);		  // Center the rudder servo.
+	// Center the collective servos.
+	collective1Pos = moveServo(collective1Servo, collective1Pos, 90);
+	collective2Pos = moveServo(collective2Servo, collective2Pos, 90);
+	collective3Pos = moveServo(collective3Servo, collective3Pos, 90);
+} // End of killSwitch() function.
+
+/**
+ * callback() handles MQTT subscriptions.
+ * When a message comes in on a topic we have subscribed to, this function is executed.
+ */
 void callback(char *topic, byte *payload, unsigned int length)
 {
 	Serial.println();
@@ -217,12 +246,16 @@ void callback(char *topic, byte *payload, unsigned int length)
 				collectiveChange(receivedValue - '0');		 // Send the 1-9 value.
 			}
 		}
+		else if (receivedKey == 'k') // Kill switch!
+		{
+			killSwitch(); // Turn everything off.
+		}
 	}
 } // End of callback() function.
 
 /**
-   reconnect() will attempt to reconnect the MQTT and WiFi clients.
-*/
+ * reconnect() will attempt to reconnect the MQTT and WiFi clients.
+ */
 void reconnect()
 {
 	// Loop until we're reconnected.
@@ -246,8 +279,8 @@ void reconnect()
 } // End of reconnect() function.
 
 /**
-   The setup() function runs once when the device is booted, and then loop() takes over.
-*/
+ * The setup() function runs once when the device is booted, and then loop() takes over.
+ */
 void setup()
 {
 	throttleServo.attach(throttlePin);		  // Attach the throttle servo to the appropriate pin.
@@ -301,8 +334,8 @@ void setup()
 } // End of setup() function.
 
 /**
-   The loop() function begins after setup(), and repeats as long as the unit is powered.
-*/
+ * The loop() function begins after setup(), and repeats as long as the unit is powered.
+ */
 void loop()
 {
 	int pos; // A position variable for the servo.
