@@ -40,19 +40,20 @@ This would also work well as a bench test for any radio-controlled project.
 The API for this project is a simple two-character string, where the first character is a key designating the device to be controlled, and the second character (a digit) is a value representing the setting for that device.
 For lighting, zero extinguishes the light, and any non-zero value will illuminate the light.
 
-**First character:**
+**First character (key):**
 
-- t = throttle servo
-- c = collective servo
-- r = rudder servo
-- f = floodlight LEDs
-- l = green TLOF circle LEDs
-- a = white FATO square LEDs
-- k = kill switch (turn off ESC and all lights, move servos to neutral, second character is ignored)
+| Key | Component |
+| t | throttle servo |
+| c | collective servo |
+| r | rudder servo |
+| f | floodlight LEDs |
+| l | green TLOF circle LEDs |
+| a | white FATO square LEDs |
+| k | kill switch (turn off ESC and all lights, move servos to neutral, second character is ignored) |
 
-**Second character:**
+**Second character (value):**
 
-| Value | LED | Servos | ESC |
+| Value | LED effect | Servo effect | ESC effect |
 |---|---|---|---|
 | 0 | off (LEDs and ESC) | maximum CCW position (servos) |
 | 1 | on (LEDs) | 20° from CCW position (servos) | 11% of maximum speed (ESC) |
@@ -69,7 +70,7 @@ For servos, the 0-9 API value is multiplied by 20 to put it in a 0-180 range nee
 
 The default topic of "mqttServo" is set with the 'mqttTopic' global constant near the top of the file.  The default MQTT broker address and port are also set using global constants near the top of the file.
 
-A sample message using the Mosquitto command line utility on Windows to set the collective to 160° (70° downward pitch, pushing air away from the helicopter, towards the floor):
+A sample message using the Mosquitto command line utility, sending a key of `c` and a value of `8`, which will set the collective to 160° (70° downward pitch, pushing air away from the helicopter, towards the floor):
 
 ```mosquitto_pub -h 192.168.55.200 -p 2112 -i testPublish -t mqttServo -m "c8"```
 
