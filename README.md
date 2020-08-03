@@ -43,6 +43,7 @@ For lighting, zero extinguishes the light, and any non-zero value will illuminat
 **First character (key):**
 
 | Key | Component |
+|---|---|
 | t | throttle servo |
 | c | collective servo |
 | r | rudder servo |
