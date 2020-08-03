@@ -1,0 +1,32 @@
+# Common settings
+BasedOnStyle:	GNU
+TabWidth:		3
+IndentWidth:	3
+UseTab:			Always
+ColumnLimit:	100
+
+AlignTrailingComments:						true
+AllowShortFunctionsOnASingleLine:		true
+AllowShortIfStatementsOnASingleLine:	true
+AllowShortLoopsOnASingleLine:				true
+BinPackParameters:							false
+BreakBeforeBraces:							Allman
+ColumnLimit:									0
+IndentCaseLabels:								true
+MaxEmptyLinesToKeep:							2
+PointerBindsToType:							true
+ReflowComments:								false
+SortIncludes:									true
+
+SpaceAfterCStyleCast:				false
+SpaceBeforeAssignmentOperators:	true
+SpaceBeforeParens:					Never
+SpaceInEmptyParentheses:			false
+SpacesBeforeTrailingComments:		1
+SpacesInAngles:						false
+SpacesInContainerLiterals:			true
+SpacesInCStyleCastParentheses:	true
+SpacesInParentheses:					true
+SpacesInSquareBrackets:				false
+SpaceAfterTemplateKeyword:			true
+SpaceBeforeInheritanceColon:		true

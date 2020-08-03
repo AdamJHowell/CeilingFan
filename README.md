@@ -48,7 +48,7 @@ For lighting, zero extinguishes the light, and any non-zero value will illuminat
 - f = floodlight LEDs
 - l = green TLOF circle LEDs
 - a = white FATO square LEDs
-- k = kill switch (turn off ESC and all lights, move servos to neutral)
+- k = kill switch (turn off ESC and all lights, move servos to neutral, second character is ignored)
 
 **Second character:**
 
@@ -64,13 +64,13 @@ For lighting, zero extinguishes the light, and any non-zero value will illuminat
 | 7 | on (LEDs) | 140° from CCW position (servos) | 77% of maximum speed (ESC) |
 | 8 | on (LEDs) | 160° from CCW position (servos) | 88% of maximum speed (ESC) |
 | 9 | on (LEDs) | maximum CW position (servos) | maximum speed (ESC) |
-| * | off (LEDs and ESC) | 90° neutral position (servos) |
 
 For servos, the 0-9 API value is multiplied by 20 to put it in a 0-180 range needed for the Arduino servo API.
 
 The default topic of "mqttServo" is set with the 'mqttTopic' global constant near the top of the file.  The default MQTT broker address and port are also set using global constants near the top of the file.
 
 A sample message using the Mosquitto command line utility on Windows to set the collective to 160° (70° downward pitch, pushing air away from the helicopter, towards the floor):
+
 ```mosquitto_pub -h 192.168.55.200 -p 2112 -i testPublish -t mqttServo -m "c8"```
 
 No attempt is made to use QoS levels greater than 0.  This sketch is only a subscriber, and makes no attempt to respond with QoS acknowledgements.
