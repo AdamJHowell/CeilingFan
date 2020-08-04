@@ -6,9 +6,13 @@ UseTab:			Always
 ColumnLimit:	100
 
 AlignTrailingComments:						true
-AllowShortFunctionsOnASingleLine:		true
+AllowShortFunctionsOnASingleLine:		All
 AllowShortIfStatementsOnASingleLine:	true
+AllowShortBlocksOnASingleLine:			true
 AllowShortLoopsOnASingleLine:				true
+AlwaysBreakAfterReturnType:				None
+AlwaysBreakAfterDefinitionReturnType:	false
+BinPackArguments:								false
 BinPackParameters:							false
 BreakBeforeBraces:							Allman
 ColumnLimit:									0
@@ -19,14 +23,18 @@ ReflowComments:								false
 SortIncludes:									true
 
 SpaceAfterCStyleCast:				false
+SpacesInCStyleCastParentheses:	true
 SpaceBeforeAssignmentOperators:	true
 SpaceBeforeParens:					Never
 SpaceInEmptyParentheses:			false
 SpacesBeforeTrailingComments:		1
 SpacesInAngles:						false
 SpacesInContainerLiterals:			true
-SpacesInCStyleCastParentheses:	true
 SpacesInParentheses:					true
 SpacesInSquareBrackets:				false
 SpaceAfterTemplateKeyword:			true
 SpaceBeforeInheritanceColon:		true
+
+PenaltyReturnTypeOnItsOwnLine:	9999
+PenaltyBreakComment:					1000
+PenaltyBreakString:					1000

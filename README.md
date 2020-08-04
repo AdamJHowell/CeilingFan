@@ -42,7 +42,7 @@ For lighting, zero extinguishes the light, and any non-zero value will illuminat
 
 **First character (key):**
 
-| Key | Component |
+| Key | Component or action |
 |---|---|
 | t | throttle servo |
 | c | collective servo |
