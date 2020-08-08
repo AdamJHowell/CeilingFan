@@ -14,19 +14,29 @@
 
 
 // WiFi and MQTT constants.
-const char* ssid = "Red";
-const char* password = "8012254722";
-const char* mqttServer = "192.168.55.200";
+const char* wifiSsid = "Red";
+const char* wifiPassword = "8012254722";
+const char* mqttBroker = "192.168.55.200";
 const int mqttPort = 2112;
 const char* mqttTopic = "mqttServo";
-const int throttlePin = 16;	// Use GPIO16 (D0) for the throttle (ESC).
-const int rudderPin = 5;		// Use GPIO5 (D1) for the rudder.
-const int collective1Pin = 4; // Use GPIO4 (D2) for the collective1.
-const int collective2Pin = 0; // Use GPIO0 (D3) for the collective2.
-const int collective3Pin = 2; // Use GPIO2 (D4) for the collective3.
-const int floodLEDPin = 1;		// Use GPIO1 () for the floodlights.
-const int tlofLEDPin = 3;		// Use GPIO3 () for the green TLOF circle LEDs.
-const int fatoLEDPin = 15;		// Use GPIO15 () for the white FATO square LEDs.
+char clientAddress[16];
+// Don't use GPIO2 or GPIO16 for servos.  Those are onboard LEDs, and they seem to cause problems.
+const int ESP12LED = 2;
+const int MCULED = 16;
+// Servo GPIO addresses.
+const int throttlePin = 4;		// Use GPIO? () for the throttle (ESC).
+const int rudderPin = 4;		// Use GPIO? () for the rudder.
+const int collective1Pin = 4; // Use GPIO? () for the collective1.
+const int collective2Pin = 4; // Use GPIO? () for the collective2.
+const int collective3Pin = 4; // Use GPIO? () for the collective3.
+// LED GPIO addresses.
+const int floodLEDPin = 4;		// Use GPIO? () for the floodlights.
+const int tlofLEDPin = 4;		// Use GPIO? () for the green TLOF circle LEDs.
+const int fatoLEDPin = 4;		// Use GPIO? () for the white FATO square LEDs.
+// Misc values.
+const int LED_ON = 0;
+const int LED_OFF = 1;
+const int escArmValue = 10;	// The value to send to the ESC in order to "arm" it.
 int throttlePos = 0;
 int rudderPos = 90;
 int collective1Pos = 90;
@@ -43,7 +53,7 @@ Servo collective3Servo;					  // Create servo object to control one of the three
 
 
 /**
- * moveServo() reads the current position, and gradually moves the servo to the new position.
+ * moveServo() moves the servo to the new position and returns the difference between old and new positions.
  */
 int moveServo( Servo thisServo, int curPos, int newPos )
 {
@@ -65,63 +75,55 @@ int moveServo( Servo thisServo, int curPos, int newPos )
 		Serial.print( curPos );
 		Serial.print( " to " );
 		Serial.println( newPos );
-		if( curPos < newPos )
-		{
-			for( ; curPos < newPos; curPos++ )
-			{
-				thisServo.write( curPos );
-				delay( 15 );
-			}
-		}
-		else
-		{
-			for( ; curPos > newPos; curPos-- )
-			{
-				thisServo.write( curPos );
-				delay( 15 );
-			}
-		}
+		thisServo.write( curPos );
 	}
-	delay( 100 ); // This delay may need to be tweaked, and may vary from servo to servo.
-	return newPos;
+	return abs( curPos - newPos );
 } // End of moveServo() function.
 
 
 /**
- * throttleChange() will handle the scaling and limits needed, and pass real-world values to
- * moveServo().
+ * throttleChange() will handle the scaling and limits needed, and pass real-world values to moveServo().
  */
 void throttleChange( int receivedValue )
 {
 	int finalValue = receivedValue * 20; // Multiply by 20 to scale from 1-9 up to 1-180.
-	throttlePos = moveServo( throttleServo, throttlePos, finalValue );
+	int delayValue = moveServo( throttleServo, throttlePos, finalValue );
+	throttlePos = finalValue;
+	// Pause by a period relative to the amount moved.  This will need to be tweaked as well.
+	delay( 10 * delayValue );
 } // End of throttleChange() function.
 
 
 /**
- * collectiveChange() will handle the scaling and limits needed, and pass real-world values to
- * moveServo().
+ * collectiveChange() will handle the scaling and limits needed, and pass real-world values to moveServo().
  */
 void collectiveChange( int receivedValue )
 {
 	int finalValue = receivedValue * 20;
-	// ToDo: These next 3 lines may need significant tweaking of finalValue before calling
-	// moveServo(). Some servos will need finalValue inverted (180 - finalValue). These moves happen
-	// sequentially (1, 2, 3), not simultaneously.
-	collective1Pos = moveServo( collective1Servo, collective1Pos, finalValue );
-	collective2Pos = moveServo( collective2Servo, collective2Pos, finalValue );
-	collective3Pos = moveServo( collective3Servo, collective3Pos, finalValue );
+	// ToDo: These next 3 lines may need significant tweaking of finalValue before calling moveServo().
+	// This is because the mechanical linkage lengths and servo arm positions vary.
+	// At least one servo will need to send an inverted finalValue (180 - finalValue).
+	int delayValue = moveServo( collective1Servo, collective1Pos, finalValue );
+	moveServo( collective2Servo, collective2Pos, finalValue );
+	moveServo( collective3Servo, collective3Pos, finalValue );
+	collective1Pos = finalValue;
+	collective2Pos = finalValue;
+	collective3Pos = finalValue;
+	// Pause by a period relative to the amount moved.  This will need to be tweaked as well.
+	delay( 10 * delayValue );
 } // End of collectiveChange() function.
 
 
 /**
- * rudderChange() will handle the scaling and limits needed, and pass real-world values to
- * moveServo().
+ * rudderChange() will handle the scaling and limits needed, and pass real-world values to moveServo().
  */
 void rudderChange( int receivedValue )
 {
 	int finalValue = receivedValue * 20;
-	rudderPos = moveServo( rudderServo, rudderPos, finalValue );
+	int delayValue = moveServo( rudderServo, rudderPos, finalValue );
+	rudderPos = finalValue;
+	// Pause by a period relative to the amount moved.  This will need to be tweaked as well.
+	delay( 10 * delayValue );
 } // End of rudderChange() function.
 
 
@@ -132,9 +134,13 @@ void floodLightChange( int receivedValue )
 {
 	// Note that some boards consider 'HIGH' to be off.
 	if( receivedValue == 0 )
-		digitalWrite( floodLEDPin, HIGH ); // Turn the LED off.
+		digitalWrite( floodLEDPin, LED_OFF ); // Turn the LED off.
 	else
-		digitalWrite( floodLEDPin, LOW ); // Turn the LED on.
+	{
+		digitalWrite( floodLEDPin, LED_ON ); // Turn the LED on.
+		digitalWrite( MCULED, LED_ON ); // Turn the LED on.
+		digitalWrite( ESP12LED, LED_ON ); // Turn the LED on.
+	}
 } // End of floodLightChange() function.
 
 
@@ -145,9 +151,9 @@ void tlofLightChange( int receivedValue )
 {
 	// Note that some boards consider 'HIGH' to be off.
 	if( receivedValue == 0 )
-		digitalWrite( tlofLEDPin, HIGH ); // Turn the LED off.
+		digitalWrite( tlofLEDPin, LED_OFF ); // Turn the LED off.
 	else
-		digitalWrite( tlofLEDPin, LOW ); // Turn the LED on.
+		digitalWrite( tlofLEDPin, LED_ON ); // Turn the LED on.
 } // End of tlofLightChange() function.
 
 
@@ -158,9 +164,9 @@ void fatoLightChange( int receivedValue )
 {
 	// Note that some boards consider 'HIGH' to be off.
 	if( receivedValue == 0 )
-		digitalWrite( fatoLEDPin, HIGH ); // Turn the LED off.
+		digitalWrite( fatoLEDPin, LED_OFF ); // Turn the LED off.
 	else
-		digitalWrite( fatoLEDPin, LOW ); // Turn the LED on.
+		digitalWrite( fatoLEDPin, LED_ON ); // Turn the LED on.
 } // End of fatoLightChange() function.
 
 
@@ -169,20 +175,26 @@ void fatoLightChange( int receivedValue )
  */
 void killSwitch()
 {
+	Serial.println( "Kill switch!" );
 	// Turn the ESC on.
-	throttlePos = moveServo( throttleServo, throttlePos, 0 );
+	moveServo( throttleServo, throttlePos, 0 );
+	throttlePos = 0;
 	// Turn the LED on.
-	digitalWrite( floodLEDPin, LOW );
+	digitalWrite( floodLEDPin, LED_ON );
 	// Turn the LED on.
-	digitalWrite( tlofLEDPin, LOW );
+	digitalWrite( tlofLEDPin, LED_ON );
 	// Turn the LED on.
-	digitalWrite( fatoLEDPin, LOW );
+	digitalWrite( fatoLEDPin, LED_ON );
 	// Center the rudder servo.
-	rudderPos = moveServo( rudderServo, rudderPos, 90 );
+	moveServo( rudderServo, rudderPos, 90 );
+	rudderPos = 90;
 	// Center the collective servos.
-	collective1Pos = moveServo( collective1Servo, collective1Pos, 90 );
-	collective2Pos = moveServo( collective2Servo, collective2Pos, 90 );
-	collective3Pos = moveServo( collective3Servo, collective3Pos, 90 );
+	moveServo( collective1Servo, collective1Pos, 90 );
+	moveServo( collective2Servo, collective2Pos, 90 );
+	moveServo( collective3Servo, collective3Pos, 90 );
+	collective1Pos = 90;
+	collective2Pos = 90;
+	collective3Pos = 90;
 } // End of killSwitch() function.
 
 
@@ -295,31 +307,37 @@ void callback( char* topic, byte* payload, unsigned int length )
 
 
 /**
- * reconnect() will attempt to reconnect the MQTT and WiFi clients.
+ * mqttConnect() will attempt to (re)connect the MQTT client.
  */
-void reconnect()
+void mqttConnect()
 {
-	// Loop until we're reconnected.
+	// Loop until MQTT has connected.
 	while( !mqttClient.connected() )
 	{
 		Serial.print( "Attempting MQTT connection..." );
-		// Attempt to connect using the designated clientID.
-		if( mqttClient.connect( "ESP8266 Client" ) )
+		if( mqttClient.connect( "ESP8266 Client" ) ) // Attempt to mqttConnect using the designated clientID.
 		{
 			Serial.println( "connected" );
 			// Subscribe to the designated MQTT topic.
-			mqttClient.subscribe( mqttTopic );
+			if( mqttClient.subscribe( mqttTopic ) )
+			{
+				Serial.print( "Subscribed to topic \"" );
+				Serial.print( mqttTopic );
+				Serial.println( "\"\n" );
+			}
 		}
 		else
 		{
 			Serial.print( " failed, return code: " );
 			Serial.print( mqttClient.state() );
-			Serial.println( " try again in 5 seconds" );
-			// Wait 5 seconds before retrying.
-			delay( 5000 );
+			Serial.println( " try again in 2 seconds" );
+			// Wait 2 seconds before retrying.
+			delay( 2000 );
 		}
 	}
-} // End of reconnect() function.
+	Serial.print( "MQTT is connected to " );
+	Serial.println( mqttBroker );
+} // End of mqttConnect() function.
 
 
 /**
@@ -327,6 +345,11 @@ void reconnect()
  */
 void setup()
 {
+	// Start the Serial communication to send messages to the computer.
+	Serial.begin( 115200 );
+	delay( 10 );
+	Serial.println( '\n' );
+
 	// Attach the throttle servo to the appropriate pin.
 	throttleServo.attach( throttlePin );
 	// Attach the rudder servo to the appropriate pin.
@@ -347,14 +370,11 @@ void setup()
 	collective2Servo.write( collective2Pos );
 	// Move the collective to neutral.
 	collective3Servo.write( collective3Pos );
-	// Start the Serial communication to send messages to the computer.
-	Serial.begin( 115200 );
-	delay( 10 );
-	Serial.println();
-	Serial.println();
+	// Arm the ESC
+	throttlePos = moveServo( throttleServo, throttlePos, escArmValue );
 
 	// Set the MQTT client parameters.
-	mqttClient.setServer( mqttServer, mqttPort );
+	mqttClient.setServer( mqttBroker, mqttPort );
 	// Assign the callback() function to handle MQTT callbacks.
 	mqttClient.setCallback( callback );
 
@@ -365,11 +385,11 @@ void setup()
 	// Initialize the FATO pin as an output.
 	pinMode( fatoLEDPin, OUTPUT );
 
-	Serial.printf( "Wi-Fi mode set to WIFI_STA %s\n", WiFi.mode( WIFI_STA ) ? "" : "Failed!" );
 	// Connect to the WiFi network.
-	WiFi.begin( ssid, password );
+	Serial.printf( "Wi-Fi mode set to WIFI_STA %s\n", WiFi.mode( WIFI_STA ) ? "" : "Failed!" );
+	WiFi.begin( wifiSsid, wifiPassword );
 	Serial.print( "WiFi connecting to " );
-	Serial.println( ssid );
+	Serial.println( wifiSsid );
 
 	int i = 0;
 	/*
@@ -390,11 +410,15 @@ void setup()
 		Serial.println( " seconds" );
 	}
 
+	// Print that WiFi has connected.
 	Serial.println( '\n' );
-	Serial.println( "Connection established!" );
-	Serial.print( "IP address:\t" );
-	// Send the IP address of the ESP8266 to the serial port.
-	Serial.println( WiFi.localIP() );
+	Serial.println( "WiFi connection established!" );
+	Serial.print( "MAC address: " );
+	Serial.println( WiFi.macAddress() );
+	Serial.print( "IP address: " );
+	// Store client IP address into clientAddress.
+	sprintf( clientAddress, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
+	Serial.println( clientAddress );
 } // End of setup() function.
 
 
@@ -405,7 +429,7 @@ void loop()
 {
 	if( !mqttClient.connected() )
 	{
-		reconnect();
+		mqttConnect();
 	}
 	mqttClient.loop();
 } // End of loop() function.

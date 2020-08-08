@@ -7,7 +7,8 @@
                 "C:\\Users\\Adam\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.3\\**",
                 "C:\\Program Files (x86)\\Arduino\\libraries",
                 "C:\\Users\\Adam\\Documents\\Arduino\\libraries",
-                "C:\\Users\\Adam\\Documents\\Arduino\\libraries\\PubSubClient\\src"
+                "C:\\Users\\Adam\\Documents\\Arduino\\libraries\\PubSubClient\\src",
+                "C:\\Users\\Adam\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4\\**"
             ],
             "forcedInclude": [],
             "intelliSenseMode": "msvc-x64",
