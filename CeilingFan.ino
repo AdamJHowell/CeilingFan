@@ -20,23 +20,23 @@ const char* mqttBroker = "192.168.55.200";
 const int mqttPort = 2112;
 const char* mqttTopic = "mqttServo";
 char clientAddress[16];
-// Don't use GPIO2 or GPIO16 for servos.  Those are onboard LEDs, and they seem to cause problems.
+// Avoid using GPIO16 for servos.  It is an onboard LED, and seems to cause problems when hooked up to a servo.
 const int ESP12LED = 2;
 const int MCULED = 16;
 // Servo GPIO addresses.
-const int throttlePin = 4;		// Use GPIO? () for the throttle (ESC).
+const int throttlePin = 2;		// Use GPIO? () for the throttle (ESC).
 const int rudderPin = 4;		// Use GPIO? () for the rudder.
 const int collective1Pin = 4; // Use GPIO? () for the collective1.
 const int collective2Pin = 4; // Use GPIO? () for the collective2.
 const int collective3Pin = 4; // Use GPIO? () for the collective3.
 // LED GPIO addresses.
-const int floodLEDPin = 4;		// Use GPIO? () for the floodlights.
-const int tlofLEDPin = 4;		// Use GPIO? () for the green TLOF circle LEDs.
-const int fatoLEDPin = 4;		// Use GPIO? () for the white FATO square LEDs.
+const int floodLEDPin = 4; // Use GPIO? () for the floodlights.
+const int tlofLEDPin = 4;	// Use GPIO? () for the green TLOF circle LEDs.
+const int fatoLEDPin = 4;	// Use GPIO? () for the white FATO square LEDs.
 // Misc values.
 const int LED_ON = 0;
 const int LED_OFF = 1;
-const int escArmValue = 10;	// The value to send to the ESC in order to "arm" it.
+const int escArmValue = 10; // The value to send to the ESC in order to "arm" it.
 int throttlePos = 0;
 int rudderPos = 90;
 int collective1Pos = 90;
@@ -138,8 +138,8 @@ void floodLightChange( int receivedValue )
 	else
 	{
 		digitalWrite( floodLEDPin, LED_ON ); // Turn the LED on.
-		digitalWrite( MCULED, LED_ON ); // Turn the LED on.
-		digitalWrite( ESP12LED, LED_ON ); // Turn the LED on.
+		digitalWrite( MCULED, LED_ON );		 // Turn the LED on.
+		digitalWrite( ESP12LED, LED_ON );	 // Turn the LED on.
 	}
 } // End of floodLightChange() function.
 
@@ -175,26 +175,27 @@ void fatoLightChange( int receivedValue )
  */
 void killSwitch()
 {
-	Serial.println( "Kill switch!" );
-	// Turn the ESC on.
-	moveServo( throttleServo, throttlePos, 0 );
+	Serial.println( "\nKill switch!\n" );
+	// Turn the ESC off.
 	throttlePos = 0;
+	throttleServo.write( throttlePos );
 	// Turn the LED on.
-	digitalWrite( floodLEDPin, LED_ON );
+	digitalWrite( floodLEDPin, LED_OFF );
 	// Turn the LED on.
-	digitalWrite( tlofLEDPin, LED_ON );
+	digitalWrite( tlofLEDPin, LED_OFF );
 	// Turn the LED on.
-	digitalWrite( fatoLEDPin, LED_ON );
+	digitalWrite( fatoLEDPin, LED_OFF );
 	// Center the rudder servo.
-	moveServo( rudderServo, rudderPos, 90 );
 	rudderPos = 90;
+	rudderServo.write( rudderPos );
 	// Center the collective servos.
-	moveServo( collective1Servo, collective1Pos, 90 );
-	moveServo( collective2Servo, collective2Pos, 90 );
-	moveServo( collective3Servo, collective3Pos, 90 );
 	collective1Pos = 90;
 	collective2Pos = 90;
 	collective3Pos = 90;
+	collective1Servo.write( collective1Pos );
+	collective2Servo.write( collective2Pos );
+	collective3Servo.write( collective3Pos );
+	delay( 1000 );
 } // End of killSwitch() function.
 
 
@@ -211,7 +212,7 @@ void callback( char* topic, byte* payload, unsigned int length )
 	for( int i = 0; i < length; i++ )
 	{
 		char receivedKey = ( char )payload[i];
-		Serial.print( receivedKey );
+		Serial.println( receivedKey );
 
 		if( receivedKey == 't' ) // Process throttle changes.
 		{
@@ -324,6 +325,10 @@ void mqttConnect()
 				Serial.print( "Subscribed to topic \"" );
 				Serial.print( mqttTopic );
 				Serial.println( "\"\n" );
+			}
+			else
+			{
+				Serial.println( "MQTT topic subscription failed!" );
 			}
 		}
 		else

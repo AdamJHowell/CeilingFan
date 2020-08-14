@@ -1,5 +1,7 @@
 # CeilingFan
 
+![License](https://img.shields.io/badge/license-MIT-blue "License")
+
 This project uses an Arduino to control an inexpensive radio-controlled helicopter.
 
 My intent is to use this as a ceiling fan, with a 450-class electric helicopter fastened upside down to the ceiling.  I can then control the helicopter using MQTT.
