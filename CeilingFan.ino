@@ -19,16 +19,17 @@ const char* wifiPassword = "8012254722";
 const char* mqttBroker = "192.168.55.200";
 const int mqttPort = 2112;
 const char* mqttTopic = "mqttServo";
+char macAddress[18];
 char clientAddress[16];
 // Avoid using GPIO16 for servos.  It is an onboard LED, and seems to cause problems when hooked up to a servo.
 const int ESP12LED = 2;
 const int MCULED = 16;
 // Servo GPIO addresses.
-const int throttlePin = 2;		// Use GPIO? () for the throttle (ESC).
-const int rudderPin = 4;		// Use GPIO? () for the rudder.
-const int collective1Pin = 4; // Use GPIO? () for the collective1.
-const int collective2Pin = 4; // Use GPIO? () for the collective2.
-const int collective3Pin = 4; // Use GPIO? () for the collective3.
+const int throttlePin = 2;		// Use GPIO2 (D4) for the throttle (ESC).
+const int rudderPin = 2;		// Use GPIO2 (D4) for the rudder.
+const int collective1Pin = 2; // Use GPIO2 (D4) for collective1.
+const int collective2Pin = 4; // Use GPIO? () for collective2.
+const int collective3Pin = 4; // Use GPIO? () for collective3.
 // LED GPIO addresses.
 const int floodLEDPin = 4; // Use GPIO? () for the floodlights.
 const int tlofLEDPin = 4;	// Use GPIO? () for the green TLOF circle LEDs.
@@ -37,6 +38,7 @@ const int fatoLEDPin = 4;	// Use GPIO? () for the white FATO square LEDs.
 const int LED_ON = 0;
 const int LED_OFF = 1;
 const int escArmValue = 10; // The value to send to the ESC in order to "arm" it.
+// Initial servo positions.
 int throttlePos = 0;
 int rudderPos = 90;
 int collective1Pos = 90;
@@ -57,17 +59,17 @@ Servo collective3Servo;					  // Create servo object to control one of the three
  */
 int moveServo( Servo thisServo, int curPos, int newPos )
 {
-	if( newPos < 0 ) // Check for an invalid value.
+	if( newPos < 5 ) // Avoid mechanical binding.
 	{
 		Serial.print( "moveServo() was given an invalid servo position: " );
 		Serial.println( newPos );
-		newPos = 5; // Set the servo to a low, but valid, position.
+		newPos = 5;
 	}
-	else if( newPos > 180 ) // Check for an invalid value.
+	else if( newPos > 175 ) // Avoid mechanical binding.
 	{
 		Serial.print( "moveServo() was given an invalid servo position: " );
 		Serial.println( newPos );
-		newPos = 175; // Set the servo to a low, but valid, position.
+		newPos = 175;
 	}
 	else
 	{
@@ -75,9 +77,10 @@ int moveServo( Servo thisServo, int curPos, int newPos )
 		Serial.print( curPos );
 		Serial.print( " to " );
 		Serial.println( newPos );
-		thisServo.write( curPos );
+		thisServo.write( newPos );
 	}
-	return abs( curPos - newPos );
+	delay( 10 * abs( curPos - newPos ) );
+	return abs( 10 * abs( curPos - newPos ) );
 } // End of moveServo() function.
 
 
@@ -87,10 +90,11 @@ int moveServo( Servo thisServo, int curPos, int newPos )
 void throttleChange( int receivedValue )
 {
 	int finalValue = receivedValue * 20; // Multiply by 20 to scale from 1-9 up to 1-180.
-	int delayValue = moveServo( throttleServo, throttlePos, finalValue );
+	// int delayValue = moveServo( throttleServo, throttlePos, finalValue );
 	throttlePos = finalValue;
+	throttleServo.write( finalValue );
 	// Pause by a period relative to the amount moved.  This will need to be tweaked as well.
-	delay( 10 * delayValue );
+	// delay( delayValue );
 } // End of throttleChange() function.
 
 
@@ -103,14 +107,17 @@ void collectiveChange( int receivedValue )
 	// ToDo: These next 3 lines may need significant tweaking of finalValue before calling moveServo().
 	// This is because the mechanical linkage lengths and servo arm positions vary.
 	// At least one servo will need to send an inverted finalValue (180 - finalValue).
-	int delayValue = moveServo( collective1Servo, collective1Pos, finalValue );
-	moveServo( collective2Servo, collective2Pos, finalValue );
-	moveServo( collective3Servo, collective3Pos, finalValue );
+	// int delayValue = moveServo( collective1Servo, collective1Pos, finalValue );
+	// moveServo( collective2Servo, collective2Pos, finalValue );
+	// moveServo( collective3Servo, collective3Pos, finalValue );
 	collective1Pos = finalValue;
 	collective2Pos = finalValue;
 	collective3Pos = finalValue;
+	collective1Servo.write( finalValue );
+	collective2Servo.write( finalValue );
+	collective3Servo.write( finalValue );
 	// Pause by a period relative to the amount moved.  This will need to be tweaked as well.
-	delay( 10 * delayValue );
+	// delay( 10 * delayValue );
 } // End of collectiveChange() function.
 
 
@@ -120,10 +127,11 @@ void collectiveChange( int receivedValue )
 void rudderChange( int receivedValue )
 {
 	int finalValue = receivedValue * 20;
-	int delayValue = moveServo( rudderServo, rudderPos, finalValue );
+	// int delayValue = moveServo( rudderServo, rudderPos, finalValue );
 	rudderPos = finalValue;
+	rudderServo.write( finalValue );
 	// Pause by a period relative to the amount moved.  This will need to be tweaked as well.
-	delay( 10 * delayValue );
+	// delay( 10 * delayValue );
 } // End of rudderChange() function.
 
 
@@ -418,11 +426,11 @@ void setup()
 	// Print that WiFi has connected.
 	Serial.println( '\n' );
 	Serial.println( "WiFi connection established!" );
+	snprintf( macAddress, 18, "%s", WiFi.macAddress().c_str() );
 	Serial.print( "MAC address: " );
-	Serial.println( WiFi.macAddress() );
+	Serial.println( macAddress );
 	Serial.print( "IP address: " );
-	// Store client IP address into clientAddress.
-	sprintf( clientAddress, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
+	snprintf( clientAddress, 16, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
 	Serial.println( clientAddress );
 } // End of setup() function.
 
