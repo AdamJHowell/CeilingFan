@@ -55,46 +55,12 @@ Servo collective3Servo;					  // Create servo object to control one of the three
 
 
 /**
- * moveServo() moves the servo to the new position and returns the difference between old and new positions.
- */
-int moveServo( Servo thisServo, int curPos, int newPos )
-{
-	if( newPos < 5 ) // Avoid mechanical binding.
-	{
-		Serial.print( "moveServo() was given an invalid servo position: " );
-		Serial.println( newPos );
-		newPos = 5;
-	}
-	else if( newPos > 175 ) // Avoid mechanical binding.
-	{
-		Serial.print( "moveServo() was given an invalid servo position: " );
-		Serial.println( newPos );
-		newPos = 175;
-	}
-	else
-	{
-		Serial.print( "\nMoving from " );
-		Serial.print( curPos );
-		Serial.print( " to " );
-		Serial.println( newPos );
-		thisServo.write( newPos );
-	}
-	delay( 10 * abs( curPos - newPos ) );
-	return abs( 10 * abs( curPos - newPos ) );
-} // End of moveServo() function.
-
-
-/**
  * throttleChange() will handle the scaling and limits needed, and pass real-world values to moveServo().
  */
 void throttleChange( int receivedValue )
 {
-	int finalValue = receivedValue * 20; // Multiply by 20 to scale from 1-9 up to 1-180.
-	// int delayValue = moveServo( throttleServo, throttlePos, finalValue );
-	throttlePos = finalValue;
-	throttleServo.write( finalValue );
-	// Pause by a period relative to the amount moved.  This will need to be tweaked as well.
-	// delay( delayValue );
+	// Multiply by 20 to scale from 1-9 up to 1-180.
+	throttleServo.write( receivedValue * 20 );
 } // End of throttleChange() function.
 
 
@@ -107,17 +73,9 @@ void collectiveChange( int receivedValue )
 	// ToDo: These next 3 lines may need significant tweaking of finalValue before calling moveServo().
 	// This is because the mechanical linkage lengths and servo arm positions vary.
 	// At least one servo will need to send an inverted finalValue (180 - finalValue).
-	// int delayValue = moveServo( collective1Servo, collective1Pos, finalValue );
-	// moveServo( collective2Servo, collective2Pos, finalValue );
-	// moveServo( collective3Servo, collective3Pos, finalValue );
-	collective1Pos = finalValue;
-	collective2Pos = finalValue;
-	collective3Pos = finalValue;
 	collective1Servo.write( finalValue );
 	collective2Servo.write( finalValue );
 	collective3Servo.write( finalValue );
-	// Pause by a period relative to the amount moved.  This will need to be tweaked as well.
-	// delay( 10 * delayValue );
 } // End of collectiveChange() function.
 
 
@@ -126,12 +84,8 @@ void collectiveChange( int receivedValue )
  */
 void rudderChange( int receivedValue )
 {
-	int finalValue = receivedValue * 20;
-	// int delayValue = moveServo( rudderServo, rudderPos, finalValue );
-	rudderPos = finalValue;
-	rudderServo.write( finalValue );
-	// Pause by a period relative to the amount moved.  This will need to be tweaked as well.
-	// delay( 10 * delayValue );
+	// Multiply by 20 to scale from 1-9 up to 1-180.
+	rudderServo.write( receivedValue * 20 );
 } // End of rudderChange() function.
 
 
@@ -140,7 +94,6 @@ void rudderChange( int receivedValue )
  */
 void floodLightChange( int receivedValue )
 {
-	// Note that some boards consider 'HIGH' to be off.
 	if( receivedValue == 0 )
 		digitalWrite( floodLEDPin, LED_OFF ); // Turn the LED off.
 	else
@@ -185,7 +138,6 @@ void killSwitch()
 {
 	Serial.println( "\nKill switch!\n" );
 	// Turn the ESC off.
-	throttlePos = 0;
 	throttleServo.write( throttlePos );
 	// Turn the LED on.
 	digitalWrite( floodLEDPin, LED_OFF );
@@ -193,13 +145,8 @@ void killSwitch()
 	digitalWrite( tlofLEDPin, LED_OFF );
 	// Turn the LED on.
 	digitalWrite( fatoLEDPin, LED_OFF );
-	// Center the rudder servo.
-	rudderPos = 90;
+	// Center the rudder servo and collective servos.
 	rudderServo.write( rudderPos );
-	// Center the collective servos.
-	collective1Pos = 90;
-	collective2Pos = 90;
-	collective3Pos = 90;
 	collective1Servo.write( collective1Pos );
 	collective2Servo.write( collective2Pos );
 	collective3Servo.write( collective3Pos );
@@ -230,7 +177,7 @@ void callback( char* topic, byte* payload, unsigned int length )
 				char receivedValue = ( char )payload[i + 1];
 				// Increment the index since it was consumed.
 				i++;
-				// Send the 0-9 value.
+				// Convert the ASCII value to decimal.
 				throttleChange( receivedValue - '0' );
 			}
 		}
@@ -242,7 +189,7 @@ void callback( char* topic, byte* payload, unsigned int length )
 				char receivedValue = ( char )payload[i + 1];
 				// Increment the index since it was consumed.
 				i++;
-				// Send the 1-9 value.
+				// Convert the ASCII value to decimal.
 				collectiveChange( receivedValue - '0' );
 			}
 		}
@@ -254,7 +201,7 @@ void callback( char* topic, byte* payload, unsigned int length )
 				char receivedValue = ( char )payload[i + 1];
 				// Increment the index since it was consumed.
 				i++;
-				// Send the 1-9 value.
+				// Convert the ASCII value to decimal.
 				rudderChange( receivedValue - '0' );
 			}
 		}
@@ -266,7 +213,7 @@ void callback( char* topic, byte* payload, unsigned int length )
 				char receivedValue = ( char )payload[i + 1];
 				// Increment the index since it was consumed.
 				i++;
-				// Send the 0-1 value.
+				// Convert the ASCII value to decimal.
 				floodLightChange( receivedValue - '0' );
 			}
 		}
@@ -278,7 +225,7 @@ void callback( char* topic, byte* payload, unsigned int length )
 				char receivedValue = ( char )payload[i + 1];
 				// Increment the index since it was consumed.
 				i++;
-				// Send the 0-1 value.
+				// Convert the ASCII value to decimal.
 				tlofLightChange( receivedValue - '0' );
 			}
 		}
@@ -290,7 +237,7 @@ void callback( char* topic, byte* payload, unsigned int length )
 				char receivedValue = ( char )payload[i + 1];
 				// Increment the index since it was consumed.
 				i++;
-				// Send the 0-1 value.
+				// Convert the ASCII value to decimal.
 				fatoLightChange( receivedValue - '0' );
 			}
 		}
@@ -302,7 +249,7 @@ void callback( char* topic, byte* payload, unsigned int length )
 				char receivedValue = ( char )payload[i + 1];
 				// Increment the index since it was consumed.
 				i++;
-				// Send the 1-9 value.
+				// Convert the ASCII value to decimal.
 				collectiveChange( receivedValue - '0' );
 			}
 		}
@@ -373,18 +320,10 @@ void setup()
 	collective2Servo.attach( collective2Pin );
 	// Attach the collective3 servo to the appropriate pin.
 	collective3Servo.attach( collective3Pin );
-	// Set the throttle to zero.
-	throttleServo.write( throttlePos );
-	// Move the servo to its center position.
-	rudderServo.write( rudderPos );
-	// Move the collective to neutral.
-	collective1Servo.write( collective1Pos );
-	// Move the collective to neutral.
-	collective2Servo.write( collective2Pos );
-	// Move the collective to neutral.
-	collective3Servo.write( collective3Pos );
+	// Set the throttle to zero and all servos to their default positions.
+	killSwitch();
 	// Arm the ESC
-	throttlePos = moveServo( throttleServo, throttlePos, escArmValue );
+	throttleServo.write( escArmValue );
 
 	// Set the MQTT client parameters.
 	mqttClient.setServer( mqttBroker, mqttPort );
