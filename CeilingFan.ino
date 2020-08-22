@@ -24,19 +24,19 @@ char clientAddress[16];
 // Avoid using GPIO16 for servos.  It is an onboard LED, and seems to cause problems when hooked up to a servo.
 const int ESP12LED = 2;
 const int MCULED = 16;
-// Servo GPIO addresses.
-const int throttlePin = 2;		// Use GPIO2 (D4) for the throttle (ESC).
+// Servo GPIO addresses.  Do not use GPIO1, GPIO6, GPIO7, GPIO8, or GPIO11.  I did not test beyond GPIO12.
+const int throttlePin = 0;		// Use GPIO0 (D3) for the throttle (ESC).
 const int rudderPin = 2;		// Use GPIO2 (D4) for the rudder.
-const int collective1Pin = 2; // Use GPIO2 (D4) for collective1.
-const int collective2Pin = 4; // Use GPIO? () for collective2.
-const int collective3Pin = 4; // Use GPIO? () for collective3.
+const int collective1Pin = 3; // Use GPIO3 (RX) for collective1.
+const int collective2Pin = 4; // Use GPIO4 (D2) for collective2.
+const int collective3Pin = 5; // Use GPIO5 (D1) for collective3.
 // LED GPIO addresses.
-const int floodLEDPin = 4; // Use GPIO? () for the floodlights.
-const int tlofLEDPin = 4;	// Use GPIO? () for the green TLOF circle LEDs.
-const int fatoLEDPin = 4;	// Use GPIO? () for the white FATO square LEDs.
+const int floodLEDPin = 9; // Use GPIO9 (SD2) for the floodlights.
+const int tlofLEDPin = 10; // Use GPIO10 (SD3) for the green TLOF circle LEDs.
+const int fatoLEDPin = 12; // Use GPIO? (D6) for the white FATO square LEDs.
 // Misc values.
-const int LED_ON = 0;
-const int LED_OFF = 1;
+const int LED_ON = 0;		 // On and off are "backwards" for this board.
+const int LED_OFF = 1;		 // On and off are "backwards" for this board.
 const int escArmValue = 10; // The value to send to the ESC in order to "arm" it.
 // Initial servo positions.
 int throttlePos = 0;
