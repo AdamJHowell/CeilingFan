@@ -73,16 +73,16 @@ For lighting, zero extinguishes the light, and any non-zero value will illuminat
 
 | Value | LED effect | Servo effect | ESC effect |
 |---|---|---|---|
-| 0 | off (LEDs and ESC) | maximum CCW position (servos) |
-| 1 | on (LEDs) | 20° from CCW position (servos) | 11% of maximum speed (ESC) |
-| 2 | on (LEDs) | 40° from CCW position (servos) | 22% of maximum speed (ESC) |
-| 3 | on (LEDs) | 60° from CCW position (servos) | 33% of maximum speed (ESC) |
-| 4 | on (LEDs) | 80° from CCW position (servos) | 44% of maximum speed (ESC) |
-| 5 | on (LEDs) | 100° from CCW position (servos) | 55% of maximum speed (ESC) |
-| 6 | on (LEDs) | 120° from CCW position (servos) | 66% of maximum speed (ESC) |
-| 7 | on (LEDs) | 140° from CCW position (servos) | 77% of maximum speed (ESC) |
-| 8 | on (LEDs) | 160° from CCW position (servos) | 88% of maximum speed (ESC) |
-| 9 | on (LEDs) | maximum CW position (servos) | maximum speed (ESC) |
+| 0 | off | maximum CCW position | off |
+| 1 | on | 20° from CCW position | 11% of maximum speed |
+| 2 | on | 40° from CCW position | 22% of maximum speed |
+| 3 | on | 60° from CCW position | 33% of maximum speed |
+| 4 | on | 80° from CCW position | 44% of maximum speed |
+| 5 | on | 100° from CCW position | 55% of maximum speed |
+| 6 | on | 120° from CCW position | 66% of maximum speed |
+| 7 | on | 140° from CCW position | 77% of maximum speed |
+| 8 | on | 160° from CCW position | 88% of maximum speed |
+| 9 | on | maximum CW position | maximum speed |
 
 For servos, the 0-9 API value is multiplied by 20 to put it in a 0-180 range needed for the Arduino servo API.
 
@@ -90,6 +90,6 @@ The default topic of "mqttServo" is set with the 'mqttTopic' global constant nea
 
 A sample message using the Mosquitto command line utility, sending a key of `c` and a value of `8`, which will set the collective to 160° (70° downward pitch, pushing air away from the helicopter, towards the floor):
 
-```mosquitto_pub -h 192.168.55.200 -p 2112 -i testPublish -t mqttServo -m "c8"```
+```mosquitto_pub -h 127.0.0.1 -p 1883 -i testPublish -t mqttServo -m "c8"```
 
 No attempt is made to use QoS levels greater than 0.  This sketch is only a subscriber, and makes no attempt to respond with QoS acknowledgements.
