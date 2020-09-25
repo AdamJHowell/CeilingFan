@@ -1,11 +1,15 @@
 /**
  * Ceiling Fan
- * A ceiling fan made from a R/C helicopter.
+ * An Arduino controlled ceiling fan made from a R/C helicopter.
  * Create 2020-07-28
  * by Adam Howell
  * https://github.com/AdamJHowell/CeilingFan
  *
  * See the associated README.md for hardware and API information.
+ * The safest pins to use for output with the ESP8266 are D1, D2, D5, D6, D7, and D8.
+ * Note that the board will fail to boot if D8 is pulled high.
+ * Note that the board will fail to boot if D3, D4, or TX are pulled low.
+ * Note that pins D0, D4, RX, TX, SD2, and SD3 are high on boot.
  */
 
 #include <ESP8266WiFi.h>  // Network Client for the WiFi chipset.
@@ -25,18 +29,19 @@ char clientAddress[16];
 const int ESP12LED = 2;
 const int MCULED = 16;
 // Servo GPIO addresses.  Do not use GPIO1, GPIO6, GPIO7, GPIO8, or GPIO11.  I did not test beyond GPIO12.
-const int throttlePin = 0;		// Use GPIO0 (D3) for the throttle (ESC).
-const int rudderPin = 2;		// Use GPIO2 (D4) for the rudder.
-const int collective1Pin = 3; // Use GPIO3 (RX) for collective1.
-const int collective2Pin = 4; // Use GPIO4 (D2) for collective2.
-const int collective3Pin = 5; // Use GPIO5 (D1) for collective3.
+// Collective servos need to be on different GPIOs because at least one of them will be reversed.
+const int throttlePin = 5;		 // Use GPIO5 (D1) for the throttle (ESC).
+const int collective1Pin = 4;	 // Use GPIO4 (D2) for collective1.
+const int collective2Pin = 14; // Use GPIO14 (D5) for collective2.
+const int collective3Pin = 12; // Use GPIO12 (D6) for collective3.
+const int rudderPin = 15;		 // Use GPIO15 (D8) for the rudder.
 // LED GPIO addresses.
-const int floodLEDPin = 9; // Use GPIO9 (SD2) for the floodlights.
-const int tlofLEDPin = 10; // Use GPIO10 (SD3) for the green TLOF circle LEDs.
-const int fatoLEDPin = 12; // Use GPIO? (D6) for the white FATO square LEDs.
+const int floodLEDPin = 13; // Use GPIO13 (D7) for the floodlights.
+const int tlofLEDPin = 13;	 // Use GPIO13 (D7) for the green TLOF circle LEDs.
+const int fatoLEDPin = 13;	 // Use GPIO13 (D7) for the white FATO square LEDs.
 // Misc values.
-const int LED_ON = 0;		 // On and off are "backwards" for this board.
-const int LED_OFF = 1;		 // On and off are "backwards" for this board.
+const int LED_ON = 1;
+const int LED_OFF = 0;
 const int escArmValue = 10; // The value to send to the ESC in order to "arm" it.
 // Initial servo positions.
 int throttlePos = 0;
@@ -381,6 +386,7 @@ void loop()
 {
 	if( !mqttClient.connected() )
 	{
+		Serial.println( "Lost connection to the MQTT broker." );
 		mqttConnect();
 	}
 	mqttClient.loop();
