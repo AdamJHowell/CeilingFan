@@ -15,35 +15,44 @@
 #include <ESP8266WiFi.h>  // Network Client for the WiFi chipset.
 #include <PubSubClient.h> // PubSub is the MQTT API.
 #include <Servo.h>
+#include "networkVariables.h"		// I use this file to hide my network information from random people browsing my GitHub repo.
 
 
-// WiFi and MQTT constants.
-const char* wifiSsid = "Red";
-const char* wifiPassword = "8012254722";
-const char* mqttBroker = "192.168.55.200";
-const int mqttPort = 2112;
+/** 
+ * Network data
+ * If you do not use the networkVariables.h file to hold your network information, you will need to set these four consts to suit your needs.
+ */
+//const char* wifiSsid = "nunya";
+//const char* wifiPassword = "nunya";
+//const char* mqttBroker = "127.0.0.1";
+//const int mqttPort = 1883;
 const char* mqttTopic = "mqttServo";
 char macAddress[18];
 char clientAddress[16];
-// Avoid using GPIO16 for servos.  It is an onboard LED, and seems to cause problems when hooked up to a servo.
+
+/**
+ * ESP-8266 GPIO port assignments
+ * Avoid using GPIO16 for servos with the ESP-8266.  It is an onboard LED, and seems to cause problems when hooked up to a servo.
+ * Do not use GPIO1, GPIO6, GPIO7, GPIO8, or GPIO11.  I did not test beyond GPIO12.
+ * Collective servos need to each be on unique GPIOs because at least one of them will be reversed.
+ */
 const int ESP12LED = 2;
 const int MCULED = 16;
-// Servo GPIO addresses.  Do not use GPIO1, GPIO6, GPIO7, GPIO8, or GPIO11.  I did not test beyond GPIO12.
-// Collective servos need to be on different GPIOs because at least one of them will be reversed.
-const int throttlePin = 5;		 // Use GPIO5 (D1) for the throttle (ESC).
-const int collective1Pin = 4;	 // Use GPIO4 (D2) for collective1.
-const int collective2Pin = 14; // Use GPIO14 (D5) for collective2.
-const int collective3Pin = 12; // Use GPIO12 (D6) for collective3.
-const int rudderPin = 15;		 // Use GPIO15 (D8) for the rudder.
-// LED GPIO addresses.
-const int floodLEDPin = 13; // Use GPIO13 (D7) for the floodlights.
-const int tlofLEDPin = 13;	 // Use GPIO13 (D7) for the green TLOF circle LEDs.
-const int fatoLEDPin = 13;	 // Use GPIO13 (D7) for the white FATO square LEDs.
+const int throttlePin = 5;			// Use GPIO5 (D1) for the throttle (ESC).
+const int collective1Pin = 4;		// Use GPIO4 (D2) for collective1.
+const int collective2Pin = 14;	// Use GPIO14 (D5) for collective2.
+const int collective3Pin = 12;	// Use GPIO12 (D6) for collective3.
+const int rudderPin = 15;			// Use GPIO15 (D8) for the rudder.
+const int floodLEDPin = 13;		// Use GPIO13 (D7) for the floodlights.
+const int tlofLEDPin = 13;			// Use GPIO13 (D7) for the green TLOF circle LEDs.
+const int fatoLEDPin = 13;			// Use GPIO13 (D7) for the white FATO square LEDs.
 // Misc values.
 const int LED_ON = 1;
 const int LED_OFF = 0;
 const int escArmValue = 10; // The value to send to the ESC in order to "arm" it.
-// Initial servo positions.
+/**
+ * Initial servo positions.
+ */
 int throttlePos = 0;
 int rudderPos = 90;
 int collective1Pos = 90;
