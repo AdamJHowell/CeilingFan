@@ -12,7 +12,6 @@
  * Note that pins D0, D4, RX, TX, SD2, and SD3 are high on boot.
  */
 
-#include <ESP8266WiFi.h>  // Network Client for the WiFi chipset.
 
 //#include <ESP8266WiFi.h>  // Network Client for the WiFi chipset.
 #include <WiFi.h>  // Network Client for the WiFi chipset.
