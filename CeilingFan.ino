@@ -13,8 +13,12 @@
  */
 
 #include <ESP8266WiFi.h>  // Network Client for the WiFi chipset.
+
+//#include <ESP8266WiFi.h>  // Network Client for the WiFi chipset.
+#include <WiFi.h>  // Network Client for the WiFi chipset.
 #include <PubSubClient.h> // PubSub is the MQTT API.
-#include <Servo.h>
+//#include <Servo.h>
+#include <ESP32Servo.h>
 #include "networkVariables.h"		// I use this file to hide my network information from random people browsing my GitHub repo.
 
 
@@ -284,7 +288,10 @@ void mqttConnect()
 	// Loop until MQTT has connected.
 	while( !mqttClient.connected() )
 	{
-		Serial.print( "Attempting MQTT connection..." );
+		Serial.print( "Connecting to MQTT broker at " );
+    Serial.print( mqttBroker );
+    Serial.print( ":" );
+    Serial.print( mqttPort );
 		if( mqttClient.connect( "ESP8266 Client" ) ) // Attempt to mqttConnect using the designated clientID.
 		{
 			Serial.println( "connected" );
