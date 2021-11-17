@@ -2,24 +2,6 @@
     "version": 4,
     "configurations": [
         {
-            "name": "Win32",
-            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/cl.exe",
-            "compilerArgs": [],
-            "intelliSenseMode": "msvc-x64",
-            "includePath": [
-                "F:\\Dropbox\\Code\\Arduino\\libraries\\Servo\\src\\",
-                "C:\\Program Files (x86)\\Arduino\\libraries",
-                "C:\\Users\\Adam\\Documents\\Arduino\\libraries",
-                "C:\\Users\\Adam\\Documents\\Arduino\\libraries\\PubSubClient\\src",
-                "C:\\Users\\Adam\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\**",
-                "C:\\Users\\Adam\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.4\\**"
-            ],
-            "forcedInclude": [],
-            "cStandard": "c11",
-            "cppStandard": "c++17",
-            "defines": []
-        },
-        {
             "name": "Arduino",
             "compilerPath": "C:\\Users\\Adam\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\2.5.0-4-b40a506\\bin\\xtensa-lx106-elf-g++",
             "compilerArgs": [

@@ -13,15 +13,16 @@
  */
 
 
-//#include <ESP8266WiFi.h>  // Network Client for the WiFi chipset.
-#include <WiFi.h>  // Network Client for the WiFi chipset.
+#include <Arduino.h>
+#include <ESP8266WiFi.h>  // Network Client for the WiFi chipset.
+// #include <WiFi.h>  // Network Client for the WiFi chipset.
 #include <PubSubClient.h> // PubSub is the MQTT API.
-//#include <Servo.h>
-#include <ESP32Servo.h>
+#include <Servo.h>
+// #include <ESP32Servo.h>
 #include "networkVariables.h"		// I use this file to hide my network information from random people browsing my GitHub repo.
 
 
-/** 
+/**
  * Network data
  * If you do not use the networkVariables.h file to hold your network information, you will need to set these four consts to suit your needs.
  */

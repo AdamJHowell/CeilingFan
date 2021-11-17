@@ -28,6 +28,7 @@ When powered on, this device will connect to the WiFi network defined in network
 - Hookup wire (various).
 
 ESP8266 boards commonly have two different widths between rows of pins: 0.9" (23mm) and 1.1" (28mm).  When purchasing a NodeMCU motor shield, ensure the width of the shield matches the width of your ESP8266.
+
 Tailoring this code to your Electronic Speed Control (ESC) may require trial and error.  I found this side helpful: <http://techvalleyprojects.blogspot.com/2012/06/arduino-control-escmotor-tutorial.html>  Perhaps the most important takeaway from that is to NEVER connect your Arduino power pins to an ESC!  Other important takeaways are that the motor may not start turning until a value such as 50 is used, and the motor may stop turning at non-zero values (like 20).
 
 ### Connections
