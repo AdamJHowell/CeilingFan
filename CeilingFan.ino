@@ -13,13 +13,13 @@
  */
 
 
-#include <Arduino.h>
-#include <ESP8266WiFi.h>  // Network Client for the WiFi chipset.
-// #include <WiFi.h>  // Network Client for the WiFi chipset.
-#include <PubSubClient.h> // PubSub is the MQTT API.
-#include <Servo.h>
-// #include <ESP32Servo.h>
-#include "networkVariables.h"		// I use this file to hide my network information from random people browsing my GitHub repo.
+#include <Arduino.h>				// The built-in Arduino library.
+#include <Servo.h>				// The built-in servo library.
+#include <Wire.h>					// The built-in I2C library.
+#include <ESP8266WiFi.h>		// Network Client for the WiFi chipset.  This is added when the 8266 is added in board manager: https://github.com/esp8266/Arduino
+#include <PubSubClient.h>		// PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
+#include "Adafruit_PWMServoDriver.h"	// This is required to use the PCA9685 I2C PWM/Servo driver: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
+#include "workNetworkVariables.h"	// I use this file to hide my network information from random people browsing my GitHub repo.
 
 
 /**
@@ -33,6 +33,25 @@
 const char* mqttTopic = "mqttServo";
 char macAddress[18];
 char clientAddress[16];
+
+
+/*
+ * Adafruit PWM settings for the PCA9685.
+ */
+// Called this way, it uses the default address 0x40.
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+// Depending on your servo make, the pulse width min and max may vary.
+// Adjust these to be as small/large as possible without hitting the hard stop for max range.
+#define SERVOMIN 150	 // This is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX 600	 // This is the 'maximum' pulse length count (out of 4096)
+#define USMIN 600		 // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150
+#define USMAX 2400	 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
+#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates
+
+// The servo # counter.
+uint8_t servonum = 0;
+
 
 /**
  * ESP-8266 GPIO port assignments
@@ -311,7 +330,7 @@ void mqttConnect()
 		{
 			Serial.print( " failed, return code: " );
 			Serial.print( mqttClient.state() );
-			Serial.println( " try again in 2 seconds" );
+			Serial.println( ", will try again in 2 seconds" );
 			// Wait 2 seconds before retrying.
 			delay( 2000 );
 		}
@@ -330,6 +349,11 @@ void setup()
 	Serial.begin( 115200 );
 	delay( 10 );
 	Serial.println( '\n' );
+
+	// Initiate the PCA9685.
+	pwm.begin();
+	pwm.setOscillatorFrequency( 27000000 );
+	pwm.setPWMFreq( SERVO_FREQ ); // Analog servos run at ~50 Hz updates.
 
 	// Attach the throttle servo to the appropriate pin.
 	throttleServo.attach( throttlePin );
@@ -405,5 +429,34 @@ void loop()
 		Serial.println( "Lost connection to the MQTT broker." );
 		mqttConnect();
 	}
+	// Drive each servo one at a time using setPWM()
+	Serial.println( servonum );
+	for( uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++ )
+	{
+		pwm.setPWM( servonum, 0, pulselen );
+	}
+
+	delay( 100 );
+	for( uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen-- )
+	{
+		pwm.setPWM( servonum, 0, pulselen );
+	}
+
+	// Drive each servo one at a time using writeMicroseconds(), it's not precise due to calculation rounding!
+	// The writeMicroseconds() function is used to mimic the Arduino Servo library writeMicroseconds() behavior.
+	for( uint16_t microsec = USMIN; microsec < USMAX; microsec++ )
+	{
+		pwm.writeMicroseconds( servonum, microsec );
+	}
+
+	delay( 100 );
+	for( uint16_t microsec = USMAX; microsec > USMIN; microsec-- )
+	{
+		pwm.writeMicroseconds( servonum, microsec );
+	}
+
+	servonum++;
+	if( servonum > 7 ) servonum = 0; // Testing the first 8 servo channels.
+
 	mqttClient.loop();
 } // End of loop() function.
