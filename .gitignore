@@ -3,6 +3,7 @@
 #################
 networkVariables.h
 workNetworkVariables.h
+c_cpp_properties.json
 
 
 #################
@@ -220,3 +221,4 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+.vscode/c_cpp_properties.json
