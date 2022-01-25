@@ -452,6 +452,8 @@ void loop()
 		Serial.println( "Lost connection to the MQTT broker." );
 		mqttConnect();
 	}
+	// The loop() function facilitates the receiving of messages and maintains the connection to the broker.
+	mqttClient.loop();
 	// Drive each servo one at a time using setPWM()
 	Serial.println( servonum );
 	for( uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++ )
@@ -480,6 +482,4 @@ void loop()
 
 	servonum++;
 	if( servonum > 7 ) servonum = 0; // Testing the first 8 servo channels.
-
-	mqttClient.loop();
 } // End of loop() function.
