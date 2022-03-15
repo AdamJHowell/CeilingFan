@@ -366,8 +366,13 @@ void setup()
 {
 	// Start the Serial communication to send messages to the computer.
 	Serial.begin( 115200 );
-	delay( 10 );
-	Serial.println( '\n' );
+	while( !Serial )
+		delay( 100 );
+
+	Serial.println( "Setup is initializing the I2C bus." );
+	Wire.begin();
+
+	Serial.println( __FILE__ );
 
 	// Initiate the PCA9685.
 	pwm.begin();
