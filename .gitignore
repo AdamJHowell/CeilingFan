@@ -1,5 +1,8 @@
 .vscode/
 .vscode/*
+cmake-build-mzeropro/
+cmake-build-mzeropro/*
+.idea/
 
 #################
 ## Project-specific
