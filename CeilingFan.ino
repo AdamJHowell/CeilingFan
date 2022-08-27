@@ -25,9 +25,9 @@
  * Depending on your servo make, the pulse width min and max may vary.
  * Adjust these to be as small/large as possible without hitting the hard stop for max range.
  */
-#define SERVO_MIN 150	 // This is the 'minimum' pulse length count (out of 4096)
-#define SERVO_MAX 600	 // This is the 'maximum' pulse length count (out of 4096)
-#define US_MIN 600		 // This is the rounded 'minimum' microseconds length based on the minimum pulse of 150
+#define SERVO_MIN 150 // This is the 'minimum' pulse length count (out of 4096)
+#define SERVO_MAX 600 // This is the 'maximum' pulse length count (out of 4096)
+#define US_MIN 600	 // This is the rounded 'minimum' microseconds length based on the minimum pulse of 150
 #define US_MAX 2400	 // This is the rounded 'maximum' microseconds length based on the maximum pulse of 600
 #define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates
 #define C1 1			 // PCA9685 Servo header 1 will control collective servo 1
@@ -114,6 +114,17 @@ PubSubClient mqttClient( espClient ); // Create a PubSub MQTT client object that
 //Servo collective1Servo;			// Create servo object to control one of the three collective servos.
 //Servo collective2Servo;			// Create servo object to control one of the three collective servos.
 //Servo collective3Servo;			// Create servo object to control one of the three collective servos.
+
+
+void throttleChange( int receivedValue );
+void collectiveChange( int receivedValue );
+void rudderChange( int receivedValue );
+void floodLightChange( int receivedValue );
+void tlofLightChange( int receivedValue );
+void fatoLightChange( int receivedValue );
+void killSwitch();
+void callback( char *topic, byte *payload, unsigned int length );
+void mqttConnect();
 
 
 /**
