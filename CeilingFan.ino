@@ -11,6 +11,7 @@
  * Note that the board will fail to boot if D3, D4, or TX are pulled low.
  * Note that pins D0, D4, RX, TX, SD2, and SD3 are high on boot.
  */
+#include <Arduino.h>
 #include "Adafruit_PWMServoDriver.h" // This is required to use the PCA9685 I2C PWM/Servo driver: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
 #include "workNetworkVariables.h"	 // I use this file to hide my network information from random people on GitHub.
 #include <ESP8266WiFi.h>				 // Network Client for the Wi-Fi chipset.  This is added when the 8266 is added in board manager: https://github.com/esp8266/Arduino
