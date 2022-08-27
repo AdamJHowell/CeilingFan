@@ -13,7 +13,7 @@
  */
 #include "Adafruit_PWMServoDriver.h" // This is required to use the PCA9685 I2C PWM/Servo driver: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
 #include "workNetworkVariables.h"	 // I use this file to hide my network information from random people on GitHub.
-#include <ESP8266WiFi.h>				 // Network Client for the WiFi chipset.  This is added when the 8266 is added in board manager: https://github.com/esp8266/Arduino
+#include <ESP8266WiFi.h>				 // Network Client for the Wi-Fi chipset.  This is added when the 8266 is added in board manager: https://github.com/esp8266/Arduino
 #include <PubSubClient.h>				 // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
 #include <Arduino.h>						 // The built-in Arduino library.
 #include <Servo.h>						 // The built-in servo library.
@@ -25,19 +25,19 @@
  * Depending on your servo make, the pulse width min and max may vary.
  * Adjust these to be as small/large as possible without hitting the hard stop for max range.
  */
-#define SERVOMIN 150		// This is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX 600		// This is the 'maximum' pulse length count (out of 4096)
-#define USMIN 600			// This is the rounded 'minimum' microsecond length based on the minimum pulse of 150
-#define USMAX 2400		// This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
-#define SERVO_FREQ 50	// Analog servos run at ~50 Hz updates
-#define C1 1				// PCA9685 Servo header 1 will controll collective servo 1
-#define C2 2				// PCA9685 Servo header 2 will controll collective servo 2
-#define C3 3				// PCA9685 Servo header 3 will controll collective servo 3
-#define TROTTLE 4			// PCA9685 Servo header 4 will controll the throttle
-#define RUDDER 5			// PCA9685 Servo header 5 will controll the rudder
-#define TDPC 12			// GPIO 12 (D6) controls the green Touchdown Positioning Circle LEDs
-#define TLOF 13			// GPIO 13 (D7) controls the white Touchdown Liftoff area LEDs
-#define FLOOD 14			// GPIO 14 (D5) controls the Floodlights
+#define SERVO_MIN 150	 // This is the 'minimum' pulse length count (out of 4096)
+#define SERVO_MAX 600	 // This is the 'maximum' pulse length count (out of 4096)
+#define US_MIN 600		 // This is the rounded 'minimum' microseconds length based on the minimum pulse of 150
+#define US_MAX 2400	 // This is the rounded 'maximum' microseconds length based on the maximum pulse of 600
+#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates
+#define C1 1			 // PCA9685 Servo header 1 will control collective servo 1
+#define C2 2			 // PCA9685 Servo header 2 will control collective servo 2
+#define C3 3			 // PCA9685 Servo header 3 will control collective servo 3
+#define THROTTLE 4	 // PCA9685 Servo header 4 will control the throttle
+#define RUDDER 5		 // PCA9685 Servo header 5 will control the rudder
+#define TDPC 12		 // GPIO 12 (D6) controls the green Touchdown Positioning Circle LEDs
+#define TLOF 13		 // GPIO 13 (D7) controls the white Touchdown Liftoff area LEDs
+#define FLOOD 14		 // GPIO 14 (D5) controls the Floodlights
 
 
 /*
@@ -55,11 +55,10 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 //const char * wifiPassword = "nunya";
 //const char * mqttBroker = "127.0.0.1";
 //const int mqttPort = 1883;
-const char * mqttTopic = "mqttServo";
-const String sketchName = "CeilingFan.ino";
+const char *MQTT_TOPIC = "mqttServo";
+const String SKETCH_NAME = "CeilingFan.ino";
 char macAddress[18];
 char clientAddress[16];
-uint8_t servonum = 0;	// The servo # counter.
 
 
 /**
@@ -78,20 +77,21 @@ uint8_t servonum = 0;	// The servo # counter.
  * GPIO9: pin is high at BOOT
  * GPIO4 and GPIO5 are the most safe to use GPIOs if you want to operate relays.
  */
-const int MCULED = 2;				// Boot fails if pulled low!
-const int ESP12LED = 16;			// Pin is high at boot.
+const int MCU_LED = 2;	 // Boot fails if pulled low!
+const int ESP12LED = 16; // Pin is high at boot.
 //const int throttlePin = 5;		// Use GPIO5 (D1) for the throttle (ESC).
 //const int collective1Pin = 4;	// Use GPIO4 (D2) for collective1.
 //const int collective2Pin = 14;	// Use GPIO14 (D5) for collective2.
 //const int collective3Pin = 12;	// Use GPIO12 (D6) for collective3.
 //const int rudderPin = 15;		// Use GPIO15 (D8) for the rudder.
-const int floodLEDPin = 14;		// Use GPIO14 (D5) for the floodlights.
-const int tlofLEDPin = 12;			// Use GPIO12 (D7) for the green TLOF circle LEDs.
-const int fatoLEDPin = 13;			// Use GPIO13 (D7) for the white FATO square LEDs.
+const int FLOOD_LED_PIN = 14; // Use GPIO14 (D5) for the floodlights.
+const int TLOF_LED_PIN = 12;	// Use GPIO12 (D7) for the green TLOF circle LEDs.
+const int FATO_LED_PIN = 13;	// Use GPIO13 (D7) for the white FATO square LEDs.
 // Misc values.
 const int LED_ON = 1;
 const int LED_OFF = 0;
-const int escArmValue = 10;		// The value to send to the ESC in order to "arm" it.
+const int escArmValue = 10; // The value to send to the ESC in order to "arm" it.
+
 /**
  * Initial servo positions.
  */
@@ -101,8 +101,14 @@ int collective1Pos = 90;
 int collective2Pos = 90;
 int collective3Pos = 90;
 
-WiFiClient espClient;				// Create a WiFiClient to connect to the local network.
-PubSubClient mqttClient( espClient );	// Create a PubSub MQTT client object that uses the WiFiClient.
+/**
+ * Other Globals
+ */
+uint8_t servoNumber = 0; // The servo # counter.
+
+
+WiFiClient espClient;					  // Create a WiFiClient to connect to the local network.
+PubSubClient mqttClient( espClient ); // Create a PubSub MQTT client object that uses the WiFiClient.
 //Servo throttleServo;				// Create servo object to control the ESC.
 //Servo rudderServo;					// Create servo object to control the rudder.
 //Servo collective1Servo;			// Create servo object to control one of the three collective servos.
@@ -151,12 +157,12 @@ void rudderChange( int receivedValue )
 void floodLightChange( int receivedValue )
 {
 	if( receivedValue == 0 )
-		digitalWrite( floodLEDPin, LED_OFF ); // Turn the LED off.
+		digitalWrite( FLOOD_LED_PIN, LED_OFF ); // Turn the LED off.
 	else
 	{
-		digitalWrite( floodLEDPin, LED_ON ); // Turn the LED on.
-		digitalWrite( MCULED, LED_ON );		 // Turn the LED on.
-		digitalWrite( ESP12LED, LED_ON );	 // Turn the LED on.
+		digitalWrite( FLOOD_LED_PIN, LED_ON ); // Turn the LED on.
+		digitalWrite( MCU_LED, LED_ON );			// Turn the LED on.
+		digitalWrite( ESP12LED, LED_ON );		// Turn the LED on.
 	}
 } // End of floodLightChange() function.
 
@@ -168,9 +174,9 @@ void tlofLightChange( int receivedValue )
 {
 	// Note that some boards consider 'HIGH' to be off.
 	if( receivedValue == 0 )
-		digitalWrite( tlofLEDPin, LED_OFF ); // Turn the LED off.
+		digitalWrite( TLOF_LED_PIN, LED_OFF ); // Turn the LED off.
 	else
-		digitalWrite( tlofLEDPin, LED_ON ); // Turn the LED on.
+		digitalWrite( TLOF_LED_PIN, LED_ON ); // Turn the LED on.
 } // End of tlofLightChange() function.
 
 
@@ -181,9 +187,9 @@ void fatoLightChange( int receivedValue )
 {
 	// Note that some boards consider 'HIGH' to be off.
 	if( receivedValue == 0 )
-		digitalWrite( fatoLEDPin, LED_OFF ); // Turn the LED off.
+		digitalWrite( FATO_LED_PIN, LED_OFF ); // Turn the LED off.
 	else
-		digitalWrite( fatoLEDPin, LED_ON ); // Turn the LED on.
+		digitalWrite( FATO_LED_PIN, LED_ON ); // Turn the LED on.
 } // End of fatoLightChange() function.
 
 
@@ -196,11 +202,11 @@ void killSwitch()
 	// Turn the ESC off.
 	throttleServo.write( throttlePos );
 	// Turn the LED on.
-	digitalWrite( floodLEDPin, LED_OFF );
+	digitalWrite( FLOOD_LED_PIN, LED_OFF );
 	// Turn the LED on.
-	digitalWrite( tlofLEDPin, LED_OFF );
+	digitalWrite( TLOF_LED_PIN, LED_OFF );
 	// Turn the LED on.
-	digitalWrite( fatoLEDPin, LED_OFF );
+	digitalWrite( FATO_LED_PIN, LED_OFF );
 	// Center the rudder servo and collective servos.
 	rudderServo.write( rudderPos );
 	collective1Servo.write( collective1Pos );
@@ -214,7 +220,7 @@ void killSwitch()
  * callback() handles MQTT subscriptions.
  * When a message comes in on a topic we have subscribed to, this function is executed.
  */
-void callback( char* topic, byte* payload, unsigned int length )
+void callback( char *topic, byte *payload, unsigned int length )
 {
 	Serial.println();
 	Serial.print( "Message arrived [" );
@@ -324,7 +330,7 @@ void callback( char* topic, byte* payload, unsigned int length )
 void mqttConnect()
 {
 	// Loop until MQTT has connected.
-	while( !mqttClient.connected() )	// ToDo: Change this to exit after a maximum count.
+	while( !mqttClient.connected() ) // ToDo: Change this to exit after a maximum count.
 	{
 		Serial.print( "Connecting to MQTT broker at " );
 		Serial.print( mqttBroker );
@@ -334,10 +340,10 @@ void mqttConnect()
 		{
 			Serial.println( "connected" );
 			// Subscribe to the designated MQTT topic.
-			if( mqttClient.subscribe( mqttTopic ) )
+			if( mqttClient.subscribe( MQTT_TOPIC ) )
 			{
 				Serial.print( "Subscribed to topic \"" );
-				Serial.print( mqttTopic );
+				Serial.print( MQTT_TOPIC );
 				Serial.println( "\"\n" );
 			}
 			else
@@ -400,13 +406,13 @@ void setup()
 	mqttClient.setCallback( callback );
 
 	// Initialize the floodlight pin as an output.
-	pinMode( floodLEDPin, OUTPUT );
+	pinMode( FLOOD_LED_PIN, OUTPUT );
 	// Initialize the TLOF pin as an output.
-	pinMode( tlofLEDPin, OUTPUT );
+	pinMode( TLOF_LED_PIN, OUTPUT );
 	// Initialize the FATO pin as an output.
-	pinMode( fatoLEDPin, OUTPUT );
+	pinMode( FATO_LED_PIN, OUTPUT );
 
-	// Connect to the WiFi network.
+	// Connect to the Wi-Fi network.
 	Serial.printf( "Wi-Fi mode set to WIFI_STA %s\n", WiFi.mode( WIFI_STA ) ? "" : "Failed!" );
 	WiFi.begin( wifiSsid, wifiPassword );
 	Serial.print( "WiFi connecting to " );
@@ -415,13 +421,13 @@ void setup()
 	int i = 0;
 	/*
 	WiFi.status() return values:
-	0 : WL_IDLE_STATUS when WiFi is in process of changing between statuses
+	0 : WL_IDLE_STATUS when Wi-Fi is in process of changing between statuses
 	1 : WL_NO_SSID_AVAIL in case configured SSID cannot be reached
 	3 : WL_CONNECTED after successful connection is established
 	4 : WL_CONNECT_FAILED if password is incorrect
 	6 : WL_DISCONNECTED if module is not configured in station mode
   */
-	while( WiFi.status() != WL_CONNECTED ) // Wait for the WiFi to connect.
+	while( WiFi.status() != WL_CONNECTED ) // Wait for the Wi-Fi to connect.
 	{
 		delay( 1000 );
 		Serial.println( "Waiting for a connection..." );
@@ -433,7 +439,7 @@ void setup()
 	WiFi.setAutoReconnect( true );
 	WiFi.persistent( true );
 
-	// Print that WiFi has connected.
+	// Print that Wi-Fi has connected.
 	Serial.println( '\n' );
 	Serial.println( "WiFi connection established!" );
 	snprintf( macAddress, 18, "%s", WiFi.macAddress().c_str() );
@@ -460,31 +466,31 @@ void loop()
 	// The loop() function facilitates the receiving of messages and maintains the connection to the broker.
 	mqttClient.loop();
 	// Drive each servo one at a time using setPWM()
-	Serial.println( servonum );
-	for( uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++ )
+	Serial.println( servoNumber );
+	for( uint16_t pulseLength = SERVO_MIN; pulseLength < SERVO_MAX; pulseLength++ )
 	{
-		pwm.setPWM( servonum, 0, pulselen );
+		pwm.setPWM( servoNumber, 0, pulseLength );
 	}
 
 	delay( 100 );
-	for( uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen-- )
+	for( uint16_t pulseLength = SERVO_MAX; pulseLength > SERVO_MIN; pulseLength-- )
 	{
-		pwm.setPWM( servonum, 0, pulselen );
+		pwm.setPWM( servoNumber, 0, pulseLength );
 	}
 
-	// Drive each servo one at a time using writeMicroseconds(), it's not precise due to calculation rounding!
-	// The writeMicroseconds() function is used to mimic the Arduino Servo library writeMicroseconds() behavior.
-	for( uint16_t microsec = USMIN; microsec < USMAX; microsec++ )
+	// Drive each servo one at a time using microseconds(), it's not precise due to calculation rounding!
+	// The microseconds() function is used to mimic the Arduino Servo library microseconds() behavior.
+	for( uint16_t microseconds = US_MIN; microseconds < US_MAX; microseconds++ )
 	{
-		pwm.writeMicroseconds( servonum, microsec );
+		pwm.microseconds( servoNumber, microseconds );
 	}
 
 	delay( 100 );
-	for( uint16_t microsec = USMAX; microsec > USMIN; microsec-- )
+	for( uint16_t microseconds = US_MAX; microseconds > US_MIN; microseconds-- )
 	{
-		pwm.writeMicroseconds( servonum, microsec );
+		pwm.microseconds( servoNumber, microseconds );
 	}
 
-	servonum++;
-	if( servonum > 7 ) servonum = 0; // Testing the first 8 servo channels.
+	servoNumber++;
+	if( servoNumber > 7 ) servoNumber = 0; // Testing the first 8 servo channels.
 } // End of loop() function.
