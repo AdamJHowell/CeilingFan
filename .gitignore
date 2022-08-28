@@ -1,8 +1,9 @@
 .vscode/
 .vscode/*
-cmake-build-mzeropro/
-cmake-build-mzeropro/*
+cmake-build-debug/
+cmake-build-debug/*
 .idea/
+privateInfo.h
 
 #################
 ## Project-specific

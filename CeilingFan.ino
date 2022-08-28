@@ -1,6 +1,6 @@
 /**
  * Ceiling Fan
- * An Arduino controlled ceiling fan made from a R/C helicopter.
+ * @brief An Arduino controlled ceiling fan made from a R/C helicopter.
  * Created 2020-07-28
  * by Adam Howell
  * https://github.com/AdamJHowell/CeilingFan
@@ -11,8 +11,8 @@
  * Note that the board will fail to boot if D3, D4, or TX are pulled low.
  * Note that pins D0, D4, RX, TX, SD2, and SD3 are high on boot.
  */
-#include "Adafruit_PWMServoDriver.h" // This is required to use the PCA9685 I2C PWM/Servo driver: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
-#include "workNetworkVariables.h"	 // I use this file to hide my network information from random people on GitHub.
+#include "Adafruit_PWMServoDriver.h"	// This is required to use the PCA9685 I2C PWM/Servo driver: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
+#include "privateInfo.h"					// I use this file to hide my network information from random people on GitHub.
 #include <ESP8266WiFi.h>				 // Network Client for the Wi-Fi chipset.  This is added when the 8266 is added in board manager: https://github.com/esp8266/Arduino
 #include <PubSubClient.h>				 // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
 #include <Arduino.h>						 // The built-in Arduino library.
@@ -123,8 +123,13 @@ void floodLightChange( int receivedValue );
 void tlofLightChange( int receivedValue );
 void fatoLightChange( int receivedValue );
 void killSwitch();
-void callback( char *topic, byte *payload, unsigned int length );
+void onReceiveCallback( char *topic, byte *payload, unsigned int length );
 void mqttConnect();
+void onReceiveCallback( char *topic, byte *payload, unsigned int length );
+void configureOTA();
+void wifiMultiConnect();
+int checkForSSID( const char *ssidName );
+bool mqttMultiConnect( int maxAttempts );
 
 
 /**
@@ -228,10 +233,10 @@ void killSwitch()
 
 
 /**
- * callback() handles MQTT subscriptions.
+ * onReceiveCallback() handles MQTT subscriptions.
  * When a message comes in on a topic we have subscribed to, this function is executed.
  */
-void callback( char *topic, byte *payload, unsigned int length )
+void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 {
 	Serial.println();
 	Serial.print( "Message arrived [" );
@@ -332,7 +337,7 @@ void callback( char *topic, byte *payload, unsigned int length )
 			killSwitch();
 		}
 	}
-} // End of callback() function.
+} // End of onReceiveCallback() function.
 
 
 /**
@@ -414,7 +419,7 @@ void setup()
 	// Set the MQTT client parameters.
 	mqttClient.setServer( mqttBroker, mqttPort );
 	// Assign the callback() function to handle MQTT callbacks.
-	mqttClient.setCallback( callback );
+	mqttClient.setCallback( onReceiveCallback );
 
 	// Initialize the floodlight pin as an output.
 	pinMode( FLOOD_LED_PIN, OUTPUT );
@@ -470,38 +475,28 @@ void setup()
 void loop()
 {
 	if( !mqttClient.connected() )
-	{
-		Serial.println( "Lost connection to the MQTT broker." );
 		mqttConnect();
-	}
 	// The loop() function facilitates the receiving of messages and maintains the connection to the broker.
 	mqttClient.loop();
+
 	// Drive each servo one at a time using setPWM()
 	Serial.println( servoNumber );
 	for( uint16_t pulseLength = SERVO_MIN; pulseLength < SERVO_MAX; pulseLength++ )
-	{
 		pwm.setPWM( servoNumber, 0, pulseLength );
-	}
 
 	delay( 100 );
 	for( uint16_t pulseLength = SERVO_MAX; pulseLength > SERVO_MIN; pulseLength-- )
-	{
 		pwm.setPWM( servoNumber, 0, pulseLength );
-	}
 
 	// Drive each servo one at a time using microseconds(), it's not precise due to calculation rounding!
 	// The microseconds() function is used to mimic the Arduino Servo library microseconds() behavior.
 	for( uint16_t microseconds = US_MIN; microseconds < US_MAX; microseconds++ )
-	{
 		pwm.microseconds( servoNumber, microseconds );
-	}
 
 	delay( 100 );
 	for( uint16_t microseconds = US_MAX; microseconds > US_MIN; microseconds-- )
-	{
 		pwm.microseconds( servoNumber, microseconds );
-	}
 
 	servoNumber++;
-	if( servoNumber > 7 ) servoNumber = 0; // Testing the first 8 servo channels.
+	if( servoNumber > 3 ) servoNumber = 0; // Testing the first 8 servo channels.
 } // End of loop() function.
