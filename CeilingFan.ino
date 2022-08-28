@@ -11,8 +11,8 @@
  * Note that the board will fail to boot if D3, D4, or TX are pulled low.
  * Note that pins D0, D4, RX, TX, SD2, and SD3 are high on boot.
  */
-#include "Adafruit_PWMServoDriver.h"	// This is required to use the PCA9685 I2C PWM/Servo driver: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
-#include "privateInfo.h"					// I use this file to hide my network information from random people on GitHub.
+#include "Adafruit_PWMServoDriver.h" // This is required to use the PCA9685 I2C PWM/Servo driver: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
+#include "privateInfo.h"				 // I use this file to hide my network information from random people on GitHub.
 #include <ESP8266WiFi.h>				 // Network Client for the Wi-Fi chipset.  This is added when the 8266 is added in board manager: https://github.com/esp8266/Arduino
 #include <PubSubClient.h>				 // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
 #include <Arduino.h>						 // The built-in Arduino library.
@@ -25,22 +25,22 @@
  * Depending on your servo make, the pulse width min and max may vary.
  * Adjust these to be as small/large as possible without hitting the hard stop for max range.
  */
-#define SERVO_MIN 150 // This is the 'minimum' pulse length count (out of 4096)
-#define SERVO_MAX 600 // This is the 'maximum' pulse length count (out of 4096)
-#define US_MIN 600	 // This is the rounded 'minimum' microseconds length based on the minimum pulse of 150
-#define US_MAX 2400	 // This is the rounded 'maximum' microseconds length based on the maximum pulse of 600
-#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates
-#define C1 1			 // PCA9685 Servo header 1 will control collective servo 1
-#define C2 2			 // PCA9685 Servo header 2 will control collective servo 2
-#define C3 3			 // PCA9685 Servo header 3 will control collective servo 3
-#define THROTTLE 4	 // PCA9685 Servo header 4 will control the throttle
-#define RUDDER 5		 // PCA9685 Servo header 5 will control the rudder
-#define TDPC 12		 // GPIO 12 (D6) controls the green Touchdown Positioning Circle LEDs
-#define TLOF 13		 // GPIO 13 (D7) controls the white Touchdown Liftoff area LEDs
-#define FLOOD 14		 // GPIO 14 (D5) controls the Floodlights
+#define SERVO_MIN	 150	// This is the 'minimum' pulse length count (out of 4096)
+#define SERVO_MAX	 600	// This is the 'maximum' pulse length count (out of 4096)
+#define US_MIN		 600	// This is the rounded 'minimum' microseconds length based on the minimum pulse of 150
+#define US_MAX		 2400 // This is the rounded 'maximum' microseconds length based on the maximum pulse of 600
+#define SERVO_FREQ 50	// Analog servos run at ~50 Hz updates
+#define C1			 1		// PCA9685 Servo header 1 will control collective servo 1
+#define C2			 2		// PCA9685 Servo header 2 will control collective servo 2
+#define C3			 3		// PCA9685 Servo header 3 will control collective servo 3
+#define THROTTLE	 4		// PCA9685 Servo header 4 will control the throttle
+#define RUDDER		 5		// PCA9685 Servo header 5 will control the rudder
+#define TDPC		 12	// GPIO 12 (D6) controls the green Touchdown Positioning Circle LEDs
+#define TLOF		 13	// GPIO 13 (D7) controls the white Touchdown Liftoff area LEDs
+#define FLOOD		 14	// GPIO 14 (D5) controls the Floodlights
 
 
-/*
+/**
  * Adafruit PWM settings for the PCA9685.
  * Called this way, it uses the default address 0x40.
  */
@@ -51,9 +51,9 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
  * Network data
  * If you do not use the networkVariables.h file to hold your network information, you will need to set these four consts to suit your needs.
  */
-//const char * wifiSsid = "nunya";
-//const char * wifiPassword = "nunya";
-//const char * mqttBroker = "127.0.0.1";
+//const char *wifiSsid = "nunya";
+//const char *wifiPassword = "nunya";
+//const char *mqttBroker = "127.0.0.1";
 //const int mqttPort = 1883;
 const char *MQTT_TOPIC = "mqttServo";
 const String SKETCH_NAME = "CeilingFan.ino";
@@ -77,16 +77,16 @@ char clientAddress[16];
  * GPIO9: pin is high at BOOT
  * GPIO4 and GPIO5 are the most safe to use GPIOs if you want to operate relays.
  */
-const int MCU_LED = 2;	 // Boot fails if pulled low!
-const int ESP12LED = 16; // Pin is high at boot.
-//const int throttlePin = 5;		// Use GPIO5 (D1) for the throttle (ESC).
-//const int collective1Pin = 4;	// Use GPIO4 (D2) for collective1.
-//const int collective2Pin = 14;	// Use GPIO14 (D5) for collective2.
-//const int collective3Pin = 12;	// Use GPIO12 (D6) for collective3.
-//const int rudderPin = 15;		// Use GPIO15 (D8) for the rudder.
-const int FLOOD_LED_PIN = 14; // Use GPIO14 (D5) for the floodlights.
-const int TLOF_LED_PIN = 12;	// Use GPIO12 (D7) for the green TLOF circle LEDs.
-const int FATO_LED_PIN = 13;	// Use GPIO13 (D7) for the white FATO square LEDs.
+const int MCU_LED = 2;			 // Boot fails if pulled low!
+const int ESP12LED = 16;		 // Pin is high at boot.
+const int TLOF_LED_PIN = 12;	 // Use GPIO12 (D7) for the green TLOF circle LEDs.
+const int FATO_LED_PIN = 13;	 // Use GPIO13 (D7) for the white FATO square LEDs.
+const int FLOOD_LED_PIN = 14;	 // Use GPIO14 (D5) for the floodlights.
+//const int throttlePin = 5;		 // Use GPIO5 (D1) for the throttle (ESC).
+//const int collective1Pin = 4;	 // Use GPIO4 (D2) for collective1.
+//const int collective2Pin = 14; // Use GPIO14 (D5) for collective2.
+//const int collective3Pin = 12; // Use GPIO12 (D6) for collective3.
+//const int rudderPin = 15;		 // Use GPIO15 (D8) for the rudder.
 // Misc values.
 const int LED_ON = 1;
 const int LED_OFF = 0;

@@ -5,6 +5,7 @@ IndentWidth: 3
 UseTab: Always
 ColumnLimit: 0
 
+AlignConsecutiveMacros: AcrossEmptyLinesAndComments
 AlignTrailingComments: true
 AllowShortFunctionsOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: true
