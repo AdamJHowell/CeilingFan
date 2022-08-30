@@ -4,60 +4,129 @@
  * Ideally, this file could be used by an ESP32, ESP8266, or similar boards.
  * Because memory capacity varies wildly from device to device, buffer sizes are declared as variables in the entry-point file.
  */
+#include "CeilingFan.h"
 
 
-/*
- * onReceiveCallback() is a callback function to process MQTT subscriptions.
- * When a message comes in on a topic the MQTT client has subscribed to, this message is called.
+/**
+ * onReceiveCallback() handles MQTT subscriptions.
+ * When a message comes in on a topic we have subscribed to, this function is executed.
  */
 void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 {
-	char str[length + 1];
-	Serial.print( "Message arrived [" );
-	Serial.print( topic );
-	Serial.print( "] " );
-	int i = 0;
-	for( i = 0; i < length; i++ )
+	if( length > 0 )
 	{
-		Serial.print( ( char )payload[i] );
-		str[i] = ( char )payload[i];
-	}
-	Serial.println();
-	// Add the null terminator.
-	str[i] = 0;
-	StaticJsonDocument<JSON_DOC_SIZE> callbackJsonDoc;
-	deserializeJson( callbackJsonDoc, str );
+		StaticJsonDocument<JSON_DOC_SIZE> callbackJsonDoc;
+		deserializeJson( callbackJsonDoc, payload, length );
 
-	// The command can be: publishTelemetry, changeTelemetryInterval, or publishStatus.
-	const char *command = callbackJsonDoc["command"];
-	if( strcmp( command, "publishTelemetry" ) == 0 )
-	{
-		Serial.println( "Reading and publishing sensor values." );
-		// Poll the sensor.
-		readTelemetry();
-		// Publish the sensor readings.
-		publishTelemetry();
-		Serial.println( "Readings have been published." );
+		// Available commands are: TakePicture and publishStats.
+		const char *command = callbackJsonDoc["command"];
+		if( strcmp( command, "TakePicture" ) == 0 )
+		{
+			callbackCount++;
+			Serial.println( "TakePicture command processed." );
+			pictureIntent = 1;
+			remoteButton = 1;
+		}
+		else if( strcmp( command, "publishStats" ) == 0 )
+			publishStats();
+		else
+			Serial.printf( "Unknown command: '%s'\n", command );
 	}
-	else if( strcmp( command, "changeTelemetryInterval" ) == 0 )
+	// ToDo: Fix all of this to use the block above!!!
+	for( int i = 0; i < length; i++ )
 	{
-		Serial.println( "Changing the publish interval." );
-		unsigned long tempValue = callbackJsonDoc["value"];
-		// Only update the value if it is greater than 4 seconds.  This prevents a seconds vs. milliseconds mix-up.
-		if( tempValue > 4000 )
-			publishInterval = tempValue;
-		Serial.print( "MQTT publish interval has been updated to " );
-		Serial.println( publishInterval );
-		lastPublishTime = 0;
-	}
-	else if( strcmp( command, "publishStatus" ) == 0 )
-	{
-		Serial.println( "publishStatus is not yet implemented." );
-	}
-	else
-	{
-		Serial.print( "Unknown command: " );
-		Serial.println( command );
+		char receivedKey = ( char )payload[i];
+		Serial.println( receivedKey );
+
+		if( receivedKey == 't' ) // Process throttle changes.
+		{
+			if( length > 1 )
+			{
+				// Store the 0-9 value in receivedValue.
+				char receivedValue = ( char )payload[i + 1];
+				// Increment the index since it was consumed.
+				i++;
+				// Convert the ASCII value to decimal.
+				throttleChange( receivedValue - '0' );
+			}
+		}
+		else if( receivedKey == 'c' ) // Process collective changes.
+		{
+			if( length > 1 )
+			{
+				// Store the 1-9 value in receivedValue.
+				char receivedValue = ( char )payload[i + 1];
+				// Increment the index since it was consumed.
+				i++;
+				// Convert the ASCII value to decimal.
+				collectiveChange( receivedValue - '0' );
+			}
+		}
+		else if( receivedKey == 'r' ) // Process rudder changes.
+		{
+			if( length > 1 )
+			{
+				// Store the 1-9 value in receivedValue.
+				char receivedValue = ( char )payload[i + 1];
+				// Increment the index since it was consumed.
+				i++;
+				// Convert the ASCII value to decimal.
+				rudderChange( receivedValue - '0' );
+			}
+		}
+		else if( receivedKey == 'f' ) // Process floodlight changes.
+		{
+			if( length > 1 )
+			{
+				// Store the 0-1 value in receivedValue.
+				char receivedValue = ( char )payload[i + 1];
+				// Increment the index since it was consumed.
+				i++;
+				// Convert the ASCII value to decimal.
+				floodLightChange( receivedValue - '0' );
+			}
+		}
+		else if( receivedKey == 'l' ) // Process green TLOF circle LED changes.
+		{
+			if( length > 1 )
+			{
+				// Store the 0-1 value in receivedValue.
+				char receivedValue = ( char )payload[i + 1];
+				// Increment the index since it was consumed.
+				i++;
+				// Convert the ASCII value to decimal.
+				tlofLightChange( receivedValue - '0' );
+			}
+		}
+		else if( receivedKey == 'a' ) // Process white FATO square LED changes.
+		{
+			if( length > 1 )
+			{
+				// Store the 0-1 value in receivedValue.
+				char receivedValue = ( char )payload[i + 1];
+				// Increment the index since it was consumed.
+				i++;
+				// Convert the ASCII value to decimal.
+				fatoLightChange( receivedValue - '0' );
+			}
+		}
+		else if( receivedKey == 'c' ) // Process collective changes.
+		{
+			if( length > 1 )
+			{
+				// Store the 1-9 value in receivedValue.
+				char receivedValue = ( char )payload[i + 1];
+				// Increment the index since it was consumed.
+				i++;
+				// Convert the ASCII value to decimal.
+				collectiveChange( receivedValue - '0' );
+			}
+		}
+		else if( receivedKey == 'k' ) // Kill switch!
+		{
+			// Turn everything off.
+			killSwitch();
+		}
 	}
 } // End of onReceiveCallback() function.
 
@@ -223,7 +292,7 @@ int checkForSSID( const char *ssidName )
  * mqttMultiConnect() will:
  * 1. Check the WiFi connection, and reconnect WiFi as needed.
  * 2. Attempt to connect the MQTT client designated in 'mqttBrokerArray[networkIndex]' up to 'maxAttempts' number of times.
- * 3. Subscribe to the topic defined in 'commandTopic'.
+ * 3. Subscribe to the topic defined in 'MQTT_COMMAND_TOPIC'.
  * If the broker connection cannot be made, an error will be printed to the serial port.
  */
 bool mqttMultiConnect( int maxAttempts )
@@ -264,10 +333,10 @@ bool mqttMultiConnect( int maxAttempts )
 			}
 			publishStats();
 			// Subscribe to the command topic.
-			if( mqttClient.subscribe( commandTopic ) )
-				Serial.printf( "Successfully subscribed to topic '%s'.\n", commandTopic );
+			if( mqttClient.subscribe( MQTT_COMMAND_TOPIC ) )
+				Serial.printf( "Successfully subscribed to topic '%s'.\n", MQTT_COMMAND_TOPIC );
 			else
-				Serial.printf( "Failed to subscribe to topic '%s'!\n", commandTopic );
+				Serial.printf( "Failed to subscribe to topic '%s'!\n", MQTT_COMMAND_TOPIC );
 		}
 		else
 		{
@@ -308,3 +377,44 @@ bool mqttMultiConnect( int maxAttempts )
 	Serial.println( "Function mqttMultiConnect() has completed.\n" );
 	return true;
 } // End of mqttMultiConnect() function.
+
+
+/*
+ * publishStats() is called by mqttConnect() every time the device (re)connects to the broker, and every publishInterval milliseconds thereafter.
+ * It is also called by the callback when the "publishStats" command is received.
+ */
+void publishStats()
+{
+	char mqttStatsString[JSON_DOC_SIZE];
+	// Create a JSON Document on the stack.
+	StaticJsonDocument<JSON_DOC_SIZE> statsJsonDoc;
+	// Add data: SKETCH_NAME, macAddress, ipAddress, rssi, loopCount
+	statsJsonDoc["sketch"] = SKETCH_NAME;
+	statsJsonDoc["mac"] = macAddress;
+	statsJsonDoc["ip"] = ipAddress;
+	statsJsonDoc["rssi"] = rssi;
+	statsJsonDoc["loopCount"] = loopCount;
+
+	// Serialize statsJsonDoc into mqttStatsString, with indentation and line breaks.
+	serializeJsonPretty( statsJsonDoc, mqttStatsString );
+
+	Serial.printf( "Publishing stats to the '%s' topic.\n", MQTT_STATS_TOPIC );
+
+	rssi = WiFi.RSSI();
+	if( mqttClient.connected() )
+	{
+		if( mqttClient.connected() && mqttClient.publish( MQTT_STATS_TOPIC, mqttStatsString ) )
+		{
+			Serial.print( "Published to this broker and port: " );
+			Serial.print( mqttBrokerArray[networkIndex] );
+			Serial.print( ":" );
+			Serial.print( mqttPortArray[networkIndex] );
+			Serial.print( " to this topic: '" );
+			Serial.print( MQTT_STATS_TOPIC );
+			Serial.println( "':" );
+			Serial.println( mqttStatsString );
+		}
+		else
+			Serial.print( "\n\nPublish failed!\n\n" );
+	}
+} // End of publishStats() function.
