@@ -75,16 +75,31 @@ void setup()
 	pinMode( FATO_LED_PIN, OUTPUT );
 
 	snprintf( macAddress, 18, "%s", WiFi.macAddress().c_str() );
-	Serial.print( "MAC address: " );
-	Serial.println( macAddress );
+	Serial.printf( "MAC address: %s\n", macAddress );
 	Serial.print( "IP address: " );
 	snprintf( ipAddress, 16, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
 	Serial.println( ipAddress );
-	Serial.print( "RSSI: " );
-	Serial.println( WiFi.RSSI() );
+
+	readTelemetry();
+	printTelemetry();
 
 	Serial.println( "Function setup() has completed.\n\n" );
 } // End of setup() function.
+
+
+/**
+ * This is meant to query any data available to the device.
+ */
+void readTelemetry()
+{
+	rssi = WiFi.RSSI();
+}
+
+
+void printTelemetry()
+{
+	Serial.printf( "RSSI: %l\n", rssi );
+}
 
 
 /**
@@ -98,8 +113,15 @@ void loop()
 	// The loop() function facilitates the receiving of messages and maintains the connection to the broker.
 	mqttClient.loop();
 
+	unsigned long time = millis();
+	if( lastPollTime == 0 || ( ( time > sensorPollDelay ) && ( time - sensorPollDelay ) > lastPollTime ) )
+	{
+		readTelemetry();
+		printTelemetry();
+		lastPollTime = millis();
+	}
 	// Drive each servo one at a time using setPWM()
-	Serial.printf( "Servo number %d", servoNumber );
+	Serial.printf( "Servo number %d\n", servoNumber );
 	for( uint16_t pulseLength = SERVO_MIN; pulseLength < SERVO_MAX; pulseLength++ )
 		pwm.setPWM( servoNumber, 0, pulseLength );
 

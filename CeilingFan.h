@@ -5,18 +5,18 @@
 #ifndef CEILINGFAN_CEILINGFAN_H
 #define CEILINGFAN_CEILINGFAN_H
 
-#include <Arduino.h>							// The built-in Arduino library.
-#include "Adafruit_PWMServoDriver.h"	// This is required to use the PCA9685 I2C PWM/Servo driver: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
-#include "privateInfo.h"					// I use this file to hide my network information from random people on GitHub.
-#include <ESP8266WiFi.h>					// Network Client for the Wi-Fi chipset.  This is added when the 8266 is added in board manager: https://github.com/esp8266/Arduino
-#include <ESP8266mDNS.h>					// OTA - mDNSResponder (Multicast DNS) for the ESP8266 family.
-#include <WiFiUdp.h>							// OTA
-#include <ArduinoOTA.h>						// OTA - The Arduino OTA library.  Specific version of this are installed along with specific boards in board manager.
-#include <ArduinoJson.h>					// A JSON processing library.  Author: Benoît Blanchon  https://arduinojson.org/
-#include <PubSubClient.h>					// PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
-#include <Servo.h>							// The built-in servo library.
-#include <Wire.h>								// The built-in I2C library.
-#include <WiFiClient.h>						// Provides the WiFiClient class needed for MQTT.
+#include <Arduino.h>						 // The built-in Arduino library.
+#include "Adafruit_PWMServoDriver.h" // This is required to use the PCA9685 I2C PWM/Servo driver: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
+#include "privateInfo.h"				 // I use this file to hide my network information from random people on GitHub.
+#include <ESP8266WiFi.h>				 // Network Client for the Wi-Fi chipset.  This is added when the 8266 is added in board manager: https://github.com/esp8266/Arduino
+#include <ESP8266mDNS.h>				 // OTA - mDNSResponder (Multicast DNS) for the ESP8266 family.
+#include <WiFiUdp.h>						 // OTA
+#include <ArduinoOTA.h>					 // OTA - The Arduino OTA library.  Specific version of this are installed along with specific boards in board manager.
+#include <ArduinoJson.h>				 // A JSON processing library.  Author: Benoît Blanchon  https://arduinojson.org/
+#include <PubSubClient.h>				 // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
+#include <Servo.h>						 // The built-in servo library.
+#include <Wire.h>							 // The built-in I2C library.
+#include <WiFiClient.h>					 // Provides the WiFiClient class needed for MQTT.
 
 
 /**
@@ -53,19 +53,21 @@
 //const char *wifiPassword = "nunya";
 //const char *mqttBroker = "127.0.0.1";
 //const int mqttPort = 1883;
-const char *HOST_NAME = "CeilingFan";					// The hostname used for OTA access.
-const char *SKETCH_NAME = "CeilingFan";				// The name used when publishing stats.
-const char *MQTT_STATS_TOPIC = "HeliStats";			// The topic this device will publish to upon connection to the broker.
-const char *MQTT_COMMAND_TOPIC = "HeliCommands";	// The command topic this device will respond to.
-const unsigned long JSON_DOC_SIZE = 512;				// The ArduinoJson document size, and size of some buffers.
-char ipAddress[16];											// A character array to hold the IP address.
-char macAddress[18];											// A character array to hold the MAC address, and append a dash and 3 numbers.
-long rssi;														// A global to hold the Received Signal Strength Indicator.
-unsigned int networkIndex = 2112;						// An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
-unsigned int callbackCount = 0;							// The number of times a callback was received.
-unsigned int wifiConnectionTimeout = 10000;			// Set the Wi-Fi connection timeout to 10 seconds.
-unsigned int mqttReconnectInterval = 3000;			// Set the delay between MQTT broker connection attempts to 3 seconds.
-unsigned long loopCount = 0;								// A counter of how many times the status loop has printed stats to the serial port.
+const char *HOST_NAME = "CeilingFan";				 // The hostname used for OTA access.
+const char *SKETCH_NAME = "CeilingFan";			 // The name used when publishing stats.
+const char *MQTT_STATS_TOPIC = "HeliStats";		 // The topic this device will publish to upon connection to the broker.
+const char *MQTT_COMMAND_TOPIC = "HeliCommands"; // The command topic this device will respond to.
+const unsigned long JSON_DOC_SIZE = 512;			 // The ArduinoJson document size, and size of some buffers.
+char ipAddress[16];										 // A character array to hold the IP address.
+char macAddress[18];										 // A character array to hold the MAC address, and append a dash and 3 numbers.
+long rssi;													 // A global to hold the Received Signal Strength Indicator.
+unsigned int networkIndex = 2112;					 // An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
+unsigned int callbackCount = 0;						 // The number of times a callback was received.
+unsigned int wifiConnectionTimeout = 10000;		 // Set the Wi-Fi connection timeout to 10 seconds.
+unsigned int mqttReconnectInterval = 3000;		 // Set the delay between MQTT broker connection attempts to 3 seconds.
+unsigned long loopCount = 0;							 // A counter of how many times the status loop has printed stats to the serial port.
+unsigned long lastPollTime = 0;
+unsigned int sensorPollDelay = 10000;
 
 
 /**
@@ -142,5 +144,7 @@ void wifiMultiConnect();
 int checkForSSID( const char *ssidName );
 int mqttMultiConnect( int maxAttempts );
 void publishStats();
+void readTelemetry();
+void printTelemetry();
 
 #endif //CEILINGFAN_CEILINGFAN_H
