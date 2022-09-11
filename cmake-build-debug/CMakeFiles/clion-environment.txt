@@ -1,4 +1,4 @@
-ToolSet: 16.0 (local)@C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
-Options: msvc.arch=amd64
+ToolSet: w64 11.0 (local)@C:\Util\mingw64
+Options: 
 
-Options:
+Options:-DCMAKE_MAKE_PROGRAM=C:/Users/Adam/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/222.3739.54/bin/ninja/win/ninja.exe

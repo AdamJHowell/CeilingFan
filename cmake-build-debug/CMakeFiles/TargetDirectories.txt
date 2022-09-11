@@ -1,3 +1,0 @@
-C:/Dropbox/Code/Arduino/CeilingFan/cmake-build-debug/CMakeFiles/CeilingFan.dir
-C:/Dropbox/Code/Arduino/CeilingFan/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Dropbox/Code/Arduino/CeilingFan/cmake-build-debug/CMakeFiles/rebuild_cache.dir

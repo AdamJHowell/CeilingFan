@@ -1,4 +1,25 @@
-C:\Users\Adam\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\222.3739.54\bin\cmake\win\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - NMake Makefiles" -S C:\Dropbox\Code\Arduino\CeilingFan -B C:\Dropbox\Code\Arduino\CeilingFan\cmake-build-debug
+C:\Users\Adam\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\222.3739.54\bin\cmake\win\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=C:/Users/Adam/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/222.3739.54/bin/ninja/win/ninja.exe -G Ninja -S C:\Users\Adam\Documents\GitHub\CeilingFan -B C:\Users\Adam\Documents\GitHub\CeilingFan\cmake-build-debug
+-- The C compiler identification is GNU 12.2.0
+-- The CXX compiler identification is GNU 12.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Util/mingw64/bin/gcc.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Util/mingw64/bin/c++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
 -- Configuring done
--- Generating done
--- Build files have been written to: C:/Dropbox/Code/Arduino/CeilingFan/cmake-build-debug
+CMake Error at CMakeLists.txt:22 (add_executable):
+  Cannot find source file:
+
+    privateInfo.h
+
+
+CMake Error at CMakeLists.txt:22 (add_executable):
+  No SOURCES given to target: CeilingFan
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.
