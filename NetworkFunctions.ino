@@ -15,6 +15,7 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 {
 	if( length > 0 )
 	{
+		callbackCount++;
 		StaticJsonDocument<JSON_DOC_SIZE> callbackJsonDoc;
 		deserializeJson( callbackJsonDoc, payload, length );
 
@@ -22,10 +23,7 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 		const char *command = callbackJsonDoc["command"];
 		if( strcmp( command, "TakePicture" ) == 0 )
 		{
-			callbackCount++;
 			Serial.println( "TakePicture command processed." );
-			pictureIntent = 1;
-			remoteButton = 1;
 		}
 		else if( strcmp( command, "publishStats" ) == 0 )
 			publishStats();
@@ -157,34 +155,50 @@ void configureOTA()
 #else
 	// ToDo: Verify how stock Arduino code is meant to handle the port, username, and password.
 #endif
-	ArduinoOTA.setHostname( hostName );
+	ArduinoOTA.setHostname( HOST_NAME );
 
-	Serial.printf( "Using hostname '%s'\n", hostName );
+	Serial.printf( "Using hostname '%s'\n", HOST_NAME );
 
 	String type = "filesystem"; // SPIFFS
 	if( ArduinoOTA.getCommand() == U_FLASH )
 		type = "sketch";
 
 	// Configure the OTA callbacks.
+	// Port defaults to 8266
+	// ArduinoOTA.setPort(8266);
+
+	// Hostname defaults to esp8266-[ChipID]
+	// ArduinoOTA.setHostname("myesp8266");
+
+	// No authentication by default
+	// ArduinoOTA.setPassword("admin");
+
+	// Password can be set with it's md5 value as well
+	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+	// ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
 	ArduinoOTA.onStart( []()
 							  {
-		String type = "flash";	// U_FLASH
-		if( ArduinoOTA.getCommand() == U_SPIFFS )
-			type = "filesystem";
-		// NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-		Serial.printf( "OTA is updating the %s\n", type ); } );
+								  String type;
+								  if (ArduinoOTA.getCommand() == U_FLASH)
+									  type = "sketch";
+								  else // U_SPIFFS
+									  type = "filesystem";
+
+								  // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+								  Serial.println("Start updating " + type); } );
 	ArduinoOTA.onEnd( []()
-							{ Serial.println( "\nTerminating OTA communication." ); } );
+							{ Serial.println( "\nEnd" ); } );
 	ArduinoOTA.onProgress( []( unsigned int progress, unsigned int total )
-								  { Serial.printf( "OTA progress: %u%%\r", ( progress / ( total / 100 ) ) ); } );
+								  { Serial.printf( "Progress: %u%%\r", ( progress / ( total / 100 ) ) ); } );
 	ArduinoOTA.onError( []( ota_error_t error )
 							  {
-		Serial.printf( "Error[%u]: ", error );
-		if( error == OTA_AUTH_ERROR ) Serial.println( "OTA authentication failed!" );
-		else if( error == OTA_BEGIN_ERROR ) Serial.println( "OTA transmission failed to initiate properly!" );
-		else if( error == OTA_CONNECT_ERROR ) Serial.println( "OTA connection failed!" );
-		else if( error == OTA_RECEIVE_ERROR ) Serial.println( "OTA client was unable to properly receive data!" );
-		else if( error == OTA_END_ERROR ) Serial.println( "OTA transmission failed to terminate properly!" ); } );
+								  Serial.printf("Error[%u]: ", error);
+								  if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+								  else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+								  else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+								  else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+								  else if (error == OTA_END_ERROR) Serial.println("End Failed"); } );
 
 	// Start listening for OTA commands.
 	ArduinoOTA.begin();
@@ -216,10 +230,10 @@ void wifiMultiConnect()
 		{
 			// Attempt to connect to this WiFi network.
 			Serial.printf( "Wi-Fi mode set to WIFI_STA %s\n", WiFi.mode( WIFI_STA ) ? "" : "Failed!" );
-			if( WiFi.setHostname( hostName ) )
-				Serial.printf( "Network hostname set to '%s'\n", hostName );
+			if( WiFi.setHostname( HOST_NAME ) )
+				Serial.printf( "Network hostname set to '%s'\n", HOST_NAME );
 			else
-				Serial.printf( "Failed to set the network hostname to '%s'\n", hostName );
+				Serial.printf( "Failed to set the network hostname to '%s'\n", HOST_NAME );
 			WiFi.begin( wifiSsid, wifiPassword );
 
 			unsigned long wifiConnectionStartTime = millis();
@@ -295,7 +309,7 @@ int checkForSSID( const char *ssidName )
  * 3. Subscribe to the topic defined in 'MQTT_COMMAND_TOPIC'.
  * If the broker connection cannot be made, an error will be printed to the serial port.
  */
-bool mqttMultiConnect( int maxAttempts )
+int mqttMultiConnect( int maxAttempts )
 {
 	Serial.println( "\nFunction mqttMultiConnect() has initiated." );
 	if( WiFi.status() != WL_CONNECTED )
@@ -371,11 +385,11 @@ bool mqttMultiConnect( int maxAttempts )
 	if( !mqttClient.connected() )
 	{
 		Serial.println( "Unable to connect to the MQTT broker!" );
-		return false;
+		return 0;
 	}
 
 	Serial.println( "Function mqttMultiConnect() has completed.\n" );
-	return true;
+	return 1;
 } // End of mqttMultiConnect() function.
 
 

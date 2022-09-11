@@ -15,11 +15,13 @@ include_directories( .
 		"C:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino/"
 		"C:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/7.3.0/include/"
 		C:/Users/Adam/AppData/Local/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include/
+		C:/Users/Adam/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/3.0.2/libraries/ESP8266mDNS/src/
+		C:/Users/Adam/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/3.0.2/libraries/ArduinoOTA/
 		)
 
 add_executable( CeilingFan
 		CeilingFan.ino
-		NetworkFunctions.c
+		NetworkFunctions.ino
 		CeilingFan.h
 		privateInfo.h
-		ServoFunctions.c )
+		ServoFunctions.ino )

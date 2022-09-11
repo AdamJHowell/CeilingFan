@@ -50,6 +50,7 @@ void setup()
 	throttleServo.write( escArmValue );
 
 	wifiMultiConnect();
+	configureOTA();
 
 	// The networkIndex variable is initialized to 2112.  If it is still 2112 at this point, then WiFi failed to connect.
 	if( networkIndex != 2112 )
@@ -91,13 +92,14 @@ void setup()
  */
 void loop()
 {
+	ArduinoOTA.handle();
 	if( !mqttClient.connected() )
 		mqttMultiConnect( 5 );
 	// The loop() function facilitates the receiving of messages and maintains the connection to the broker.
 	mqttClient.loop();
 
 	// Drive each servo one at a time using setPWM()
-	Serial.println( servoNumber );
+	Serial.printf( "Servo number %d", servoNumber );
 	for( uint16_t pulseLength = SERVO_MIN; pulseLength < SERVO_MAX; pulseLength++ )
 		pwm.setPWM( servoNumber, 0, pulseLength );
 
