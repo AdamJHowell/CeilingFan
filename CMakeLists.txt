@@ -24,4 +24,7 @@ add_executable( CeilingFan
 		NetworkFunctions.ino
 		CeilingFan.h
 		privateInfo.h
-		ServoFunctions.ino )
+		ServoFunctions.ino
+		AJH_Servo.cpp
+		AJH_Servo.h
+		)

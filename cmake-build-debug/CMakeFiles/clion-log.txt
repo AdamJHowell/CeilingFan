@@ -1,5 +1,4 @@
-C:\Users\Adam\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\222.3739.54\bin\cmake\win\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=C:/Users/Adam/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/222.3739.54/bin/ninja/win/ninja.exe -G Ninja -S C:\Users\Adam\Documents\GitHub\CeilingFan -B C:\Users\Adam\Documents\GitHub\CeilingFan\cmake-build-debug
+C:\Users\Adam\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\222.3739.54\bin\cmake\win\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - NMake Makefiles" -S C:\Dropbox\Code\Arduino\CeilingFan -B C:\Dropbox\Code\Arduino\CeilingFan\cmake-build-debug
 -- Configuring done
-CMake Error: CMake can not determine linker language for target: CeilingFan
 -- Generating done
-CMake Generate step failed.  Build files cannot be regenerated correctly.
+-- Build files have been written to: C:/Dropbox/Code/Arduino/CeilingFan/cmake-build-debug

@@ -1,6 +1,6 @@
-set(CMAKE_RC_COMPILER "C:/Users/Adam/AppData/Local/JetBrains/Toolbox/apps/CLion/ch-0/222.3739.54/bin/mingw/bin/windres.exe")
+set(CMAKE_RC_COMPILER "C:/Program Files (x86)/Windows Kits/10/bin/10.0.18362.0/x64/rc.exe")
 set(CMAKE_RC_COMPILER_ARG1 "")
 set(CMAKE_RC_COMPILER_LOADED 1)
 set(CMAKE_RC_SOURCE_FILE_EXTENSIONS rc;RC)
-set(CMAKE_RC_OUTPUT_EXTENSION .obj)
+set(CMAKE_RC_OUTPUT_EXTENSION .res)
 set(CMAKE_RC_COMPILER_ENV_VAR "RC")
