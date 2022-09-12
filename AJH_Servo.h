@@ -7,9 +7,11 @@
 class AJH_Servo
 {
  private:
-	int ledPin;
-	unsigned char ledState;
-	unsigned int position;
+	unsigned int gpioPin;
+	unsigned int minMicroseconds;
+	unsigned int maxMicroseconds;
+	unsigned int currentPosition;
+	unsigned int reverse;
 
  public:
 	AJH_Servo( int gpio, int minMicros, int maxMicros, int reverse );
