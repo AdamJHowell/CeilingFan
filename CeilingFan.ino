@@ -98,7 +98,7 @@ void readTelemetry()
 
 void printTelemetry()
 {
-	Serial.printf( "RSSI: %l\n", rssi );
+	Serial.printf( "RSSI: %ld\n", rssi );
 }
 
 
