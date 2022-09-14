@@ -120,6 +120,7 @@ void loop()
 		printTelemetry();
 		lastPollTime = millis();
 	}
+
 	// Drive each servo one at a time using setPWM()
 	Serial.printf( "Servo number %d\n", servoNumber );
 	for( uint16_t pulseLength = SERVO_MIN; pulseLength < SERVO_MAX; pulseLength++ )

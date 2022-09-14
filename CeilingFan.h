@@ -17,7 +17,7 @@
 #include <Servo.h>						 // The built-in servo library.
 #include <Wire.h>							 // The built-in I2C library.
 #include <WiFiClient.h>					 // Provides the WiFiClient class needed for MQTT.
-#include "AJH_Servo.h"
+#include "SuperServo.h"                // My upgraded Servo class.
 
 
 /**
@@ -127,7 +127,6 @@ Servo rudderServo;													// Create servo object to control the rudder.
 Servo collective1Servo;												// Create servo object to control one of the three collective servos.
 Servo collective2Servo;												// Create servo object to control one of the three collective servos.
 Servo collective3Servo;												// Create servo object to control one of the three collective servos.
-AJH_Servo ajhThrottleServo( 1 );
 
 
 /**
