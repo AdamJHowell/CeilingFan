@@ -78,6 +78,7 @@ unsigned long publishCount = 0;							  // A counter of how many times the stats
 unsigned long lastPollTime = 0;
 unsigned long lastPublishTime = 0;
 unsigned int sensorPollDelay = 10000;
+unsigned int publishDelay = 60000;
 
 
 /**
@@ -128,14 +129,14 @@ uint8_t servoNumber = 0; // The servo # counter.
 /**
  * Class objects.
  */
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(); // Called this way, it uses the default address of 0x40.
-struct WiFiClient espClient;										// Create a WiFiClient to connect to the local network.
-PubSubClient mqttClient( espClient );							// Create a PubSub MQTT client object that uses the WiFiClient.
-Servo throttleServo;													// Create servo object to control the ESC.
-Servo rudderServo;													// Create servo object to control the rudder.
-Servo collective1Servo;												// Create servo object to control one of the three collective servos.
-Servo collective2Servo;												// Create servo object to control one of the three collective servos.
-Servo collective3Servo;												// Create servo object to control one of the three collective servos.
+Adafruit_PWMServoDriver pca9685 = Adafruit_PWMServoDriver(); // Called this way, it uses the default address of 0x40.
+struct WiFiClient espClient;											 // Create a WiFiClient to connect to the local network.
+PubSubClient mqttClient( espClient );								 // Create a PubSub MQTT client object that uses the WiFiClient.
+Servo throttleServo;														 // Create servo object to control the ESC.
+Servo rudderServo;														 // Create servo object to control the rudder.
+Servo collective1Servo;													 // Create servo object to control one of the three collective servos.
+Servo collective2Servo;													 // Create servo object to control one of the three collective servos.
+Servo collective3Servo;													 // Create servo object to control one of the three collective servos.
 
 
 /**

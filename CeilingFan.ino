@@ -22,7 +22,7 @@ void setup()
 	// Start the Serial communication to send messages to the computer.
 	Serial.begin( 115200 );
 	while( !Serial )
-		delay( 100 );
+		delay( 500 );
 
 	Serial.println( "Setup is initializing the I2C bus." );
 	Wire.begin();
@@ -30,9 +30,9 @@ void setup()
 	Serial.println( __FILE__ );
 
 	// Initiate the PCA9685.
-	pwm.begin();
-	pwm.setOscillatorFrequency( 27000000 );
-	pwm.setPWMFreq( SERVO_FREQ ); // Analog servos run at ~50 Hz updates.
+	pca9685.begin();
+	pca9685.setOscillatorFrequency( 27000000 );
+	pca9685.setPWMFreq( SERVO_FREQ ); // Analog servos run at ~50 Hz updates.
 
 	// Attach the throttle servo to the appropriate pin.
 	throttleServo.attach( throttlePin );
@@ -112,6 +112,8 @@ void printTelemetry()
  */
 void publishTelemetry()
 {
+	// ToDo: Include all servo positions and all LED states!
+
 	// Create a JSON Document on the stack.
 	StaticJsonDocument<JSON_DOC_SIZE> publishDocument;
 	// Add data: __FILE__, macAddress, ipAddress, tempC, tempF, humidity, rssi, publishCount, notes
@@ -176,24 +178,30 @@ void loop()
 		printTelemetry();
 		lastPollTime = millis();
 	}
+	time = millis();
+	if( lastPublishTime == 0 || ( ( time > publishDelay ) && ( time - publishDelay ) > lastPublishTime ) )
+	{
+		publishTelemetry();
+		lastPublishTime = millis();
+	}
 
 	// Drive each servo one at a time using setPWM()
 	Serial.printf( "Servo number %d\n", servoNumber );
 	for( uint16_t pulseLength = SERVO_MIN; pulseLength < SERVO_MAX; pulseLength++ )
-		pwm.setPWM( servoNumber, 0, pulseLength );
+		pca9685.setPWM( servoNumber, 0, pulseLength );
 
 	delay( 100 );
 	for( uint16_t pulseLength = SERVO_MAX; pulseLength > SERVO_MIN; pulseLength-- )
-		pwm.setPWM( servoNumber, 0, pulseLength );
+		pca9685.setPWM( servoNumber, 0, pulseLength );
 
 	// Drive each servo one at a time using microseconds(), it's not precise due to calculation rounding!
 	// The microseconds() function is used to mimic the Arduino Servo library microseconds() behavior.
 	for( uint16_t microseconds = US_MIN; microseconds < US_MAX; microseconds++ )
-		pwm.writeMicroseconds( servoNumber, microseconds );
+		pca9685.writeMicroseconds( servoNumber, microseconds );
 
 	delay( 100 );
 	for( uint16_t microseconds = US_MAX; microseconds > US_MIN; microseconds-- )
-		pwm.writeMicroseconds( servoNumber, microseconds );
+		pca9685.writeMicroseconds( servoNumber, microseconds );
 
 	servoNumber++;
 	if( servoNumber > 3 ) servoNumber = 0; // Testing the first 8 servo channels.
