@@ -17,7 +17,7 @@
 #include <Servo.h>						 // The built-in servo library.
 #include <Wire.h>							 // The built-in I2C library.
 #include <WiFiClient.h>					 // Provides the WiFiClient class needed for MQTT.
-#include "SuperServo.h"                // My upgraded Servo class.
+#include "SuperServo.h"					 // My upgraded Servo class.
 
 
 /**
@@ -54,20 +54,29 @@
 //const char *wifiPassword = "nunya";
 //const char *mqttBroker = "127.0.0.1";
 //const int mqttPort = 1883;
-const char *HOST_NAME = "CeilingFan";				 // The hostname used for OTA access.
-const char *SKETCH_NAME = "CeilingFan";			 // The name used when publishing stats.
-const char *MQTT_STATS_TOPIC = "HeliStats";		 // The topic this device will publish to upon connection to the broker.
-const char *MQTT_COMMAND_TOPIC = "HeliCommands"; // The command topic this device will respond to.
-const unsigned long JSON_DOC_SIZE = 512;			 // The ArduinoJson document size, and size of some buffers.
-char ipAddress[16];										 // A character array to hold the IP address.
-char macAddress[18];										 // A character array to hold the MAC address, and append a dash and 3 numbers.
-long rssi;													 // A global to hold the Received Signal Strength Indicator.
-unsigned int networkIndex = 2112;					 // An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
-unsigned int callbackCount = 0;						 // The number of times a callback was received.
-unsigned int wifiConnectionTimeout = 10000;		 // Set the Wi-Fi connection timeout to 10 seconds.
-unsigned int mqttReconnectInterval = 3000;		 // Set the delay between MQTT broker connection attempts to 3 seconds.
-unsigned long loopCount = 0;							 // A counter of how many times the status loop has printed stats to the serial port.
+const char *HOST_NAME = "CeilingFan";					  // The hostname used for OTA access.
+const char *SKETCH_NAME = "CeilingFan.ino";			  // The name used when publishing stats.
+const char *NOTES = "The helicopter ceiling fan";	  // The hostname used for OTA access.
+const char *MQTT_STATS_TOPIC = "heli/stats";			  // The topic this device will publish to upon connection to the broker.
+const char *MQTT_COMMAND_TOPIC = "heli/commands";	  // The command topic this device will respond to.
+const char *sketchTopic = "heli/sketch";				  // The topic used to publish the sketch name (__FILE__).
+const char *macTopic = "heli/mac";						  // The topic used to publish the MAC address.
+const char *ipTopic = "heli/ip";							  // The topic used to publish the IP address.
+const char *rssiTopic = "heli/rssi";					  // The topic used to publish the WiFi Received Signal Strength Indicator.
+const char *publishCountTopic = "heli/publishCount"; // The topic used to publish the loop count.
+const char *notesTopic = "heli/notes";					  // The topic used to publish notes relevant to this project.
+const char *mqttTopic = "espWeather";					  // The topic used to publish a single JSON message containing all data.
+const unsigned long JSON_DOC_SIZE = 512;				  // The ArduinoJson document size, and size of some buffers.
+char ipAddress[16];											  // A character array to hold the IP address.
+char macAddress[18];											  // A character array to hold the MAC address, and append a dash and 3 numbers.
+long rssi;														  // A global to hold the Received Signal Strength Indicator.
+unsigned int networkIndex = 2112;						  // An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
+unsigned int callbackCount = 0;							  // The number of times a callback was received.
+unsigned int wifiConnectionTimeout = 10000;			  // Set the Wi-Fi connection timeout to 10 seconds.
+unsigned int mqttReconnectInterval = 3000;			  // Set the delay between MQTT broker connection attempts to 3 seconds.
+unsigned long publishCount = 0;							  // A counter of how many times the stats have been published.
 unsigned long lastPollTime = 0;
+unsigned long lastPublishTime = 0;
 unsigned int sensorPollDelay = 10000;
 
 

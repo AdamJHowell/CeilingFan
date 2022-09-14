@@ -98,8 +98,64 @@ void readTelemetry()
 
 void printTelemetry()
 {
-	Serial.printf( "RSSI: %ld\n", rssi );
+	Serial.printf( "WiFi RSSI: %ld\n", rssi );
+	Serial.printf( "Sketch: %s\n", SKETCH_NAME );
+	Serial.printf( "MQTT stats topic: %s\n", MQTT_STATS_TOPIC );
+	Serial.printf( "MQTT command topic: %s\n", MQTT_COMMAND_TOPIC );
+	Serial.printf( "WiFi SSID: %s\n", wifiSsidArray[networkIndex] );
+	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
 }
+
+
+/*
+ * publishTelemetry() will publish the sensor and device data over MQTT.
+ */
+void publishTelemetry()
+{
+	// Create a JSON Document on the stack.
+	StaticJsonDocument<JSON_DOC_SIZE> publishDocument;
+	// Add data: __FILE__, macAddress, ipAddress, tempC, tempF, humidity, rssi, publishCount, notes
+	publishDocument["sketch"] = __FILE__;
+	publishDocument["mac"] = macAddress;
+	publishDocument["ip"] = ipAddress;
+	publishDocument["rssi"] = rssi;
+	publishDocument["publishCount"] = publishCount;
+
+	// Prepare a String to hold the JSON.
+	char mqttString[JSON_DOC_SIZE];
+	// Serialize the JSON into mqttString, with indentation and line breaks.
+	serializeJsonPretty( publishDocument, mqttString );
+	// Publish the JSON to the MQTT broker.
+	bool success = mqttClient.publish( mqttTopic, mqttString, false );
+	if( success )
+	{
+		publishCount++;
+		Serial.println( "Successfully published to:" );
+		char buffer[20];
+		// New format: <location>/<device>/<sensor>/<metric>
+		if( mqttClient.publish( sketchTopic, __FILE__, false ) )
+			Serial.printf( "  %s\n", sketchTopic );
+		if( mqttClient.publish( macTopic, macAddress, false ) )
+			Serial.printf( "  %s\n", macTopic );
+		if( mqttClient.publish( ipTopic, ipAddress, false ) )
+			Serial.printf( "  %s\n", ipTopic );
+		ltoa( rssi, buffer, 10 );
+		if( mqttClient.publish( rssiTopic, buffer, false ) )
+			Serial.printf( "  %s\n", rssiTopic );
+		ltoa( publishCount, buffer, 10 );
+		if( mqttClient.publish( publishCountTopic, buffer, false ) )
+			Serial.printf( "  %s\n", publishCountTopic );
+		if( mqttClient.publish( notesTopic, NOTES, false ) )
+			Serial.printf( "  %s\n", notesTopic );
+
+		Serial.printf( "Successfully published to '%s', this JSON:\n", mqttTopic );
+	}
+	else
+		Serial.println( "MQTT publish failed!  Attempted to publish this JSON to the broker:" );
+	// Print the JSON to the Serial port.
+	Serial.println( mqttString );
+	lastPublishTime = millis();
+} // End of publishTelemetry() function.
 
 
 /**

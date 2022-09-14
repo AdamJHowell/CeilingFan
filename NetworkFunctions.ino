@@ -402,12 +402,12 @@ void publishStats()
 	char mqttStatsString[JSON_DOC_SIZE];
 	// Create a JSON Document on the stack.
 	StaticJsonDocument<JSON_DOC_SIZE> statsJsonDoc;
-	// Add data: SKETCH_NAME, macAddress, ipAddress, rssi, loopCount
+	// Add data: SKETCH_NAME, macAddress, ipAddress, rssi, publishCount
 	statsJsonDoc["sketch"] = SKETCH_NAME;
 	statsJsonDoc["mac"] = macAddress;
 	statsJsonDoc["ip"] = ipAddress;
 	statsJsonDoc["rssi"] = rssi;
-	statsJsonDoc["loopCount"] = loopCount;
+	statsJsonDoc["publishCount"] = publishCount;
 
 	// Serialize statsJsonDoc into mqttStatsString, with indentation and line breaks.
 	serializeJsonPretty( statsJsonDoc, mqttStatsString );
