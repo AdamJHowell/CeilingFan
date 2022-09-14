@@ -100,6 +100,8 @@ void printTelemetry()
 {
 	Serial.println();
 	Serial.printf( "Sketch: %s\n", SKETCH_NAME );
+	Serial.printf( "File: %s\n", __FILE__ );
+	Serial.printf( "Notes: %s\n", NOTES );
 	Serial.printf( "Wi-Fi SSID: %s\n", wifiSsidArray[networkIndex] );
 	Serial.printf( "Wi-Fi RSSI: %ld\n", rssi );
 	Serial.printf( "IP address: %s\n", ipAddress );

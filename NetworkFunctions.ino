@@ -13,6 +13,7 @@
  */
 void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 {
+	// ToDo: Determine which commands this device should respond to.
 	if( length > 0 )
 	{
 		callbackCount++;
