@@ -65,20 +65,19 @@ const char *ipTopic = "heli/ip";							  // The topic used to publish the IP add
 const char *rssiTopic = "heli/rssi";					  // The topic used to publish the WiFi Received Signal Strength Indicator.
 const char *publishCountTopic = "heli/publishCount"; // The topic used to publish the loop count.
 const char *notesTopic = "heli/notes";					  // The topic used to publish notes relevant to this project.
-const char *mqttTopic = "espWeather";					  // The topic used to publish a single JSON message containing all data.
 const unsigned long JSON_DOC_SIZE = 512;				  // The ArduinoJson document size, and size of some buffers.
 char ipAddress[16];											  // A character array to hold the IP address.
 char macAddress[18];											  // A character array to hold the MAC address, and append a dash and 3 numbers.
 long rssi;														  // A global to hold the Received Signal Strength Indicator.
 unsigned int networkIndex = 2112;						  // An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
-unsigned int callbackCount = 0;							  // The number of times a callback was received.
 unsigned int wifiConnectionTimeout = 10000;			  // Set the Wi-Fi connection timeout to 10 seconds.
 unsigned int mqttReconnectInterval = 3000;			  // Set the delay between MQTT broker connection attempts to 3 seconds.
+unsigned int sensorPollDelay = 10000;					  // How long to wait between sensor polling.
+unsigned int publishDelay = 60000;						  // How long to wait between MQTT publishes.
+unsigned int callbackCount = 0;							  // The number of times a callback was received.
 unsigned long publishCount = 0;							  // A counter of how many times the stats have been published.
-unsigned long lastPollTime = 0;
-unsigned long lastPublishTime = 0;
-unsigned int sensorPollDelay = 10000;
-unsigned int publishDelay = 60000;
+unsigned long lastPollTime = 0;							  // The last time sensors were polled.
+unsigned long lastPublishTime = 0;						  // The last time a MQTT publish was performed.
 
 
 /**

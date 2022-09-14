@@ -98,12 +98,21 @@ void readTelemetry()
 
 void printTelemetry()
 {
-	Serial.printf( "WiFi RSSI: %ld\n", rssi );
+	Serial.println();
 	Serial.printf( "Sketch: %s\n", SKETCH_NAME );
+	Serial.printf( "Wi-Fi SSID: %s\n", wifiSsidArray[networkIndex] );
+	Serial.printf( "Wi-Fi RSSI: %ld\n", rssi );
+	Serial.printf( "IP address: %s\n", ipAddress );
+	Serial.printf( "MAC address: %s\n", macAddress );
+	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
+	Serial.printf( "Publish count: %lu\n", publishCount );
+	Serial.printf( "Callback count: %lu\n", callbackCount );
 	Serial.printf( "MQTT stats topic: %s\n", MQTT_STATS_TOPIC );
 	Serial.printf( "MQTT command topic: %s\n", MQTT_COMMAND_TOPIC );
-	Serial.printf( "WiFi SSID: %s\n", wifiSsidArray[networkIndex] );
-	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
+	Serial.printf( "TLOF lights: %d\n", digitalRead( TLOF_LED_PIN ) );
+	Serial.printf( "FATO lights: %d\n", digitalRead( FATO_LED_PIN ) );
+	Serial.printf( "Floodlights: %d\n", digitalRead( FLOOD_LED_PIN ) );
+	Serial.println();
 }
 
 
@@ -113,6 +122,7 @@ void printTelemetry()
 void publishTelemetry()
 {
 	// ToDo: Include all servo positions and all LED states!
+	// ToDo: Include everything from printTelemetry()
 
 	// Create a JSON Document on the stack.
 	StaticJsonDocument<JSON_DOC_SIZE> publishDocument;
@@ -128,7 +138,7 @@ void publishTelemetry()
 	// Serialize the JSON into mqttString, with indentation and line breaks.
 	serializeJsonPretty( publishDocument, mqttString );
 	// Publish the JSON to the MQTT broker.
-	bool success = mqttClient.publish( mqttTopic, mqttString, false );
+	bool success = mqttClient.publish( MQTT_STATS_TOPIC, mqttString, false );
 	if( success )
 	{
 		publishCount++;
@@ -144,13 +154,13 @@ void publishTelemetry()
 		ltoa( rssi, buffer, 10 );
 		if( mqttClient.publish( rssiTopic, buffer, false ) )
 			Serial.printf( "  %s\n", rssiTopic );
-		ltoa( publishCount, buffer, 10 );
+		snprintf( buffer, 11, "%lu", publishCount );
 		if( mqttClient.publish( publishCountTopic, buffer, false ) )
 			Serial.printf( "  %s\n", publishCountTopic );
 		if( mqttClient.publish( notesTopic, NOTES, false ) )
 			Serial.printf( "  %s\n", notesTopic );
 
-		Serial.printf( "Successfully published to '%s', this JSON:\n", mqttTopic );
+		Serial.printf( "Successfully published to '%s', this JSON:\n", MQTT_STATS_TOPIC );
 	}
 	else
 		Serial.println( "MQTT publish failed!  Attempted to publish this JSON to the broker:" );
