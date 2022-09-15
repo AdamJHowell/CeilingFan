@@ -108,7 +108,7 @@ void printTelemetry()
 	Serial.printf( "MAC address: %s\n", macAddress );
 	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
 	Serial.printf( "Publish count: %lu\n", publishCount );
-	Serial.printf( "Callback count: %lu\n", callbackCount );
+	Serial.printf( "Callback count: %u\n", callbackCount );
 	Serial.printf( "MQTT stats topic: %s\n", MQTT_STATS_TOPIC );
 	Serial.printf( "MQTT command topic: %s\n", MQTT_COMMAND_TOPIC );
 	Serial.printf( "TLOF lights: %d\n", digitalRead( TLOF_LED_PIN ) );

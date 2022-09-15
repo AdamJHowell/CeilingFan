@@ -13,6 +13,7 @@
  */
 void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 {
+  Serial.printf( "New message on topic '%s'\n", topic );
 	// ToDo: Determine which commands this device should respond to.
 	if( length > 0 )
 	{
@@ -32,7 +33,7 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 			Serial.printf( "Unknown command: '%s'\n", command );
 	}
 	// ToDo: Fix all of this to use the block above!!!
-	for( int i = 0; i < length; i++ )
+	for( unsigned int i = 0; i < length; i++ )
 	{
 		char receivedKey = ( char )payload[i];
 		Serial.println( receivedKey );
@@ -238,7 +239,7 @@ void wifiMultiConnect()
 			WiFi.begin( wifiSsid, wifiPassword );
 
 			unsigned long wifiConnectionStartTime = millis();
-			Serial.printf( "Waiting up to %lu seconds for a connection.\n", wifiConnectionTimeout / 1000 );
+			Serial.printf( "Waiting up to %u seconds for a connection.\n", wifiConnectionTimeout / 1000 );
 			/*
 			WiFi.status() return values:
 			WL_IDLE_STATUS      = 0,
@@ -342,7 +343,7 @@ int mqttMultiConnect( int maxAttempts )
 			Serial.println( " connected." );
 			if( !mqttClient.setBufferSize( JSON_DOC_SIZE ) )
 			{
-				Serial.printf( "Unable to create a buffer %d bytes long!\n", JSON_DOC_SIZE );
+				Serial.printf( "Unable to create a buffer %lu bytes long!\n", JSON_DOC_SIZE );
 				Serial.println( "Restarting the device!" );
 				ESP.restart();
 			}
@@ -377,7 +378,7 @@ int mqttMultiConnect( int maxAttempts )
 			else
 				Serial.println( "" );
 
-			Serial.printf( "Trying again in %lu seconds.\n\n", mqttReconnectInterval / 1000 );
+			Serial.printf( "Trying again in %u seconds.\n\n", mqttReconnectInterval / 1000 );
 			delay( mqttReconnectInterval );
 		}
 		attemptNumber++;
