@@ -21,7 +21,7 @@ void setup()
 {
 	// Start the Serial communication to send messages to the computer.
 	Serial.begin( 115200 );
-	while( !Serial )
+	if( !Serial )
 		delay( 500 );
 
 	Serial.println( "Setup is initializing the I2C bus." );
