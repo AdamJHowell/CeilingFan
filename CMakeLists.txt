@@ -26,3 +26,5 @@ add_executable( CeilingFan
 		privateInfo.h
 		ServoFunctions.ino
 		SuperServo.ino SuperServo.h )
+
+set_target_properties( CeilingFan PROPERTIES LINKER_LANGUAGE CXX )

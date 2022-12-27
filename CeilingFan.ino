@@ -102,11 +102,13 @@ void printTelemetry()
 	Serial.printf( "Sketch: %s\n", SKETCH_NAME );
 	Serial.printf( "File: %s\n", __FILE__ );
 	Serial.printf( "Notes: %s\n", NOTES );
-	Serial.printf( "Wi-Fi SSID: %s\n", wifiSsidArray[networkIndex] );
-	Serial.printf( "Wi-Fi RSSI: %ld\n", rssi );
-	Serial.printf( "IP address: %s\n", ipAddress );
 	Serial.printf( "MAC address: %s\n", macAddress );
-	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
+	if( networkIndex != 2112 )
+		Serial.printf( "Wi-Fi SSID: %s\n", wifiSsidArray[networkIndex] );
+	Serial.printf( "IP address: %s\n", ipAddress );
+	Serial.printf( "Wi-Fi RSSI: %ld\n", rssi );
+	if( networkIndex != 2112 )
+		Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
 	Serial.printf( "Publish count: %lu\n", publishCount );
 	Serial.printf( "Callback count: %u\n", callbackCount );
 	Serial.printf( "MQTT stats topic: %s\n", MQTT_STATS_TOPIC );
@@ -129,11 +131,27 @@ void publishTelemetry()
 	// Create a JSON Document on the stack.
 	StaticJsonDocument<JSON_DOC_SIZE> publishDocument;
 	// Add data: __FILE__, macAddress, ipAddress, tempC, tempF, humidity, rssi, publishCount, notes
-	publishDocument["sketch"] = __FILE__;
+	publishDocument["file"] = __FILE__;
 	publishDocument["mac"] = macAddress;
 	publishDocument["ip"] = ipAddress;
 	publishDocument["rssi"] = rssi;
 	publishDocument["publishCount"] = publishCount;
+	publishDocument["notes"] = NOTES;
+	if( networkIndex != 2112 )
+	{
+		publishDocument["ssid"] = wifiSsidArray[networkIndex];
+		publishDocument["broker"] = mqttBrokerArray[networkIndex];
+		publishDocument["brokerPort"] = mqttPortArray[networkIndex];
+	}
+	publishDocument["callbackCount"] = callbackCount;
+	publishDocument["tlofStatus"] = digitalRead( TLOF_LED_PIN );
+	publishDocument["fatoStatus"] = digitalRead( FATO_LED_PIN );
+	publishDocument["floodlightStatus"] = digitalRead( FLOOD_LED_PIN );
+	publishDocument["motorPower"] = throttleServo.read();
+	publishDocument["cyclic1"] = collective1Servo.read();
+	publishDocument["cyclic2"] = collective2Servo.read();
+	publishDocument["cyclic3"] = collective3Servo.read();
+	publishDocument["rudder"] = rudderServo.read();
 
 	// Prepare a String to hold the JSON.
 	char mqttString[JSON_DOC_SIZE];
