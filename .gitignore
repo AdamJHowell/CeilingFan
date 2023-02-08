@@ -1,7 +1,13 @@
+.idea/
+*.iml
+privateInfo.*
+debug_custom.json
+*.svd
+
 cmake-build-*/
 .vscode/
 .idea/
-privateInfo.h
+privateInfo.*
 
 #################
 ## Project-specific
