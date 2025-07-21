@@ -83,9 +83,9 @@ Key definitions:
 | Property   | Description                                        | Type    | Limits (inclusive) | Default |
 |------------|----------------------------------------------------|---------|--------------------|---------|
 | killswitch | Sets all properties to default values              | Boolean | `true` `false`     | false   |
-| throttle   | Controls the speed of the main and tail rotors     | Integer | 0 to 100           | 0       |
-| collective | Controls the pitch of the main rotor blades        | Integer | 0 to 100           | 50      |
-| rudder     | Controls the pitch of the rudder                   | Integer | 0 to 100           | 50      |
+| throttle   | Controls the speed of the main and tail rotors     | Integer | 0 to 180           | 0       |
+| collective | Controls the pitch of the main rotor blades        | Integer | 0 to 180           | 90      |
+| rudder     | Controls the pitch of the rudder                   | Integer | 0 to 180           | 90      |
 | floodlight | Controls the illumination of the floodlights       | Boolean | `true` `false`     | false   |
 | TLOF       | Controls the illumination of the green Touchdown LiftOFf lights | Boolean | `true` `false`     | false   |
 | FATO       | Controls the illumination of the Final Approach/Take Off lights | Boolean | `true` `false`     | false   |
