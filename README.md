@@ -11,7 +11,7 @@ I can then control the helicopter using MQTT.
 
 This could also work as a bench test device for any radio-controlled project.
 
-When powered on, this device will connect to the Wi-Fi network defined in networkVariables.h,
+When powered on, this device will connect to the Wi-Fi network defined in networkVariables.h (not included in this repo),
 then connect to the MQTT broker configured in that same file, and finally subscribe to the "mqttServo" topic.
 When messages are published to that topic, this device will receive those messages, and act accordingly.
 
@@ -37,7 +37,7 @@ ESP8266 boards commonly have two different widths between rows of pins: 0.9" (23
 
 Tailoring this code to your Electronic Speed Control (ESC) may require trial and error. I found this side helpful: <http://techvalleyprojects.blogspot.com/2012/06/arduino-control-escmotor-tutorial.html>
 
-Perhaps the most important takeaway from that is to NEVER connect your Arduino power pins to an ESC!  Modern ESCs have a Battery Elimination Circuitry (BEC) that can feedback to the ESP. The ESC should be powered by an XT60 connector, and the ESC servo pins should connect to ground and signal, but the middle power pin should NOT be connected to anything!
+Perhaps the most important takeaway from that is to NEVER connect your Arduino power pins to an ESC!  Modern ESCs have a Battery Elimination Circuitry (BEC) that can feedback to the ESP8266. The ESC should be powered by an XT60 connector, and the ESC servo pins should connect to ground and signal, but the middle power pin should NOT be connected to anything!  The BEC eliminates the need for power on this pin.
 
 Other important takeaways are that the motor may not start turning until a value such as 50 is used (~2000 ms PWM), and the motor may stop turning at non-zero values (like 20).
 
@@ -45,13 +45,13 @@ Other important takeaways are that the motor may not start turning until a value
 
 - Cyclic/Collective Pitch Mixing (CCPM) Servo lead signal pins connected to GPIO4 (D2), GPIO14 (D5), and GPIO12 (D6). At least one servo will need to be reversed, which is done in software.
 - ESC servo lead signal pin connected to GPIO5 (D1).
-- Rudder servo lead signal pin connected to GPIO15 (D8).
+- Rudder servo lead signal pin connected to GPIO15 (D8).  The rudder is optional, but if omitted, the rudder should be constrained to a centered position.
 - Connect black or brown servo wires to ground.
 - Connect red servo wires to +5V, but do not connect the red ESC servo wire to anything!
 - Connect white, orange, or yellow servo wires to signal.
 - Ensure the ESC is provided enough amperage via the XT60 connector.
 - Floodlight LEDs connected to a relay that is connected to GPIO14 (D5).
-- TLOF (Touchdown LiftOFf area) circular LED string connected to a relay that is connected to GPIO12 (D7).
+- TLOF (Touchdown LiftOFf area) circular LED string connected to a relay that is connected to GPIO13 (D7).
 - FATO (Final Approach/Take Off) square LED string connected to a relay that is connected to GPIO13 (D7).
 
 ## Software Setup
@@ -83,9 +83,9 @@ Key definitions:
 | Property   | Description                                        | Type    | Limits (inclusive) | Default |
 |------------|----------------------------------------------------|---------|--------------------|---------|
 | killswitch | Sets all properties to default values              | Boolean | `true` `false`     | false   |
-| throttle   | Controls the speed of the main and tail rotors     | Integer | 0 to 180           | 0       |
-| collective | Controls the pitch of the main rotor blades        | Integer | 0 to 180           | 90      |
-| rudder     | Controls the pitch of the rudder                   | Integer | 0 to 180           | 90      |
+| throttle   | Controls the speed of the main and tail rotors     | Integer | `0` to `180`       | 0       |
+| collective | Controls the pitch of the main rotor blades        | Integer | `0` to `180`       | 90      |
+| rudder     | Controls the pitch of the rudder                   | Integer | `0` to `180`       | 90      |
 | floodlight | Controls the illumination of the floodlights       | Boolean | `true` `false`     | false   |
 | TLOF       | Controls the illumination of the green Touchdown LiftOFf lights | Boolean | `true` `false`     | false   |
 | FATO       | Controls the illumination of the Final Approach/Take Off lights | Boolean | `true` `false`     | false   |
@@ -106,7 +106,7 @@ Sample JSON with all properties:
 
 The killswitch command stops the motor, centers the collective (no positive or negative pitch on the main rotor), and centers the tail rotor.
 
-The three servos: throttle, collective, and rudder take a positive integer from 0 to 180 which represents the servo position.
+The three servos: throttle, collective, and rudder take a positive integer from 0 to 180 which represents the servo position.  A value of 90 centers the servo.
 
 The three lights: floodlight, TLOF, and FATO take a boolean value to indicate the illumination.
 
@@ -116,8 +116,8 @@ FATO (Final Approach/Take Off) white LEDs in a square, connected to a relay that
 The default topic of "mqttServo" is set with the 'mqttTopic' global constant in the networkVariables.h file.
 The default MQTT broker address and port are also set using global constants in that file.
 
-A sample message using the Mosquitto command line utility, which will set the throttle to 25%, center the collective (no pitch):
+A sample message using the Mosquitto command line utility, which will turn on all lights, set the throttle to 25% (45), and center the collective (no pitch):
 
-```mosquitto_pub -h 127.0.0.1 -p 1883 -i testPublish -t mqttServo -m "{"killswitch":false,"throttle":45,"collective":90,"rudder":90,"floodlight":true,"TLOF":false,"FATO":true}"```
+```mosquitto_pub -h 127.0.0.1 -p 1883 -i testPublish -t mqttServo -m "{"killswitch":false,"throttle":45,"collective":90,"rudder":90,"floodlight":true,"TLOF":true,"FATO":true}"```
 
 No attempt is made to use QoS levels greater than 0. This sketch is only a subscriber, and makes no attempt to respond with QoS acknowledgements.
