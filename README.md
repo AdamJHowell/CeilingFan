@@ -75,47 +75,49 @@ Other important takeaways are that the motor may not start turning until a value
 
 ### API
 
-The API for this project is a simple two-character string,
-where the first character is a key designating the device to be controlled or the action to be performed,
-and the second character (a decimal digit) is a value representing the setting for that device.
-For lighting, zero extinguishes the light, and any non-zero value will illuminate the light.
+The API for this project is a simple JSON object of root-level keys and values.
+Any absent keys will be ignored.
 
-**First character (key):**
+Key definitions:
 
-| Key | Component or action                                                                                               |
-|-----|-------------------------------------------------------------------------------------------------------------------|
-| t   | throttle servo                                                                                                    |
-| c   | collective servo                                                                                                  |
-| r   | rudder servo                                                                                                      |
-| f   | floodlight LEDs                                                                                                   |
-| l   | green TLOF circle LEDs                                                                                            |
-| a   | white FATO square LEDs                                                                                            |
-| k   | kill switch (turn off throttle/ESC, turn off all lights, move all servos to neutral, second character is ignored) |
+| Property   | Description                                        | Type    | Limits (inclusive) | Default |
+|------------|----------------------------------------------------|---------|--------------------|---------|
+| killswitch | Sets all properties to default values              | Boolean | `true` `false`     | false   |
+| throttle   | Controls the speed of the main and tail rotors     | Integer | 0 to 100           | 0       |
+| collective | Controls the pitch of the main rotor blades        | Integer | 0 to 100           | 50      |
+| rudder     | Controls the pitch of the rudder                   | Integer | 0 to 100           | 50      |
+| floodlight | Controls the illumination of the floodlights       | Boolean | `true` `false`     | false   |
+| TLOF       | Controls the illumination of the green Touchdown LiftOFf lights | Boolean | `true` `false`     | false   |
+| FATO       | Controls the illumination of the Final Approach/Take Off lights | Boolean | `true` `false`     | false   |
 
-**Second character (value):**
+Sample JSON with all properties:
 
-| Value | LED effect | Servo effect           | ESC effect           |
-|-------|------------|------------------------|----------------------|
-| 0     | off        | maximum CCW position   | off                  |
-| 1     | on         | 20° from CCW position  | 11% of maximum speed |
-| 2     | on         | 40° from CCW position  | 22% of maximum speed |
-| 3     | on         | 60° from CCW position  | 33% of maximum speed |
-| 4     | on         | 80° from CCW position  | 44% of maximum speed |
-| 5     | on         | 100° from CCW position | 55% of maximum speed |
-| 6     | on         | 120° from CCW position | 66% of maximum speed |
-| 7     | on         | 140° from CCW position | 77% of maximum speed |
-| 8     | on         | 160° from CCW position | 88% of maximum speed |
-| 9     | on         | maximum CW position    | maximum speed        |
+```
+{
+    "killswitch": false,
+    "throttle": 0,
+    "collective": 50,
+    "rudder": 100,
+    "floodlight": true,
+    "TLOF": false,
+    "FATO": true
+}
+```
 
-For servos, the 0-9 API value is multiplied by 20 to put it in a 0-180 range needed for the Arduino servo API.
+The killswitch command stops the motor, centers the collective (no positive or negative pitch on the main rotor), and centers the tail rotor.
+
+The three servos: throttle, collective, and rudder take a positive integer from 0 to 180 which represents the servo position.
+
+The three lights: floodlight, TLOF, and FATO take a boolean value to indicate the illumination.
+
+TLOF (Touchdown LiftOFf area) green LEDs in a circle, connected to a relay that is connected to GPIO12 (D7).
+FATO (Final Approach/Take Off) white LEDs in a square, connected to a relay that is connected to GPIO13 (D7).
 
 The default topic of "mqttServo" is set with the 'mqttTopic' global constant in the networkVariables.h file.
 The default MQTT broker address and port are also set using global constants in that file.
 
-A sample message using the Mosquitto command line utility, sending a key of `c` and a value of `8`,
-which will set the collective to 160° (70° downward pitch, pushing air away from the helicopter, towards the floor):
+A sample message using the Mosquitto command line utility, which will set the throttle to 25%, center the collective (no pitch):
 
-```mosquitto_pub -h 127.0.0.1 -p 1883 -i testPublish -t mqttServo -m "c8"```
+```mosquitto_pub -h 127.0.0.1 -p 1883 -i testPublish -t mqttServo -m "{"killswitch":false,"throttle":45,"collective":90,"rudder":90,"floodlight":true,"TLOF":false,"FATO":true}"```
 
-No attempt is made to use QoS levels greater than 0. This sketch is only a subscriber,
-and makes no attempt to respond with QoS acknowledgements.
+No attempt is made to use QoS levels greater than 0. This sketch is only a subscriber, and makes no attempt to respond with QoS acknowledgements.
