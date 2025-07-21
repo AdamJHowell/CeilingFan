@@ -1,6 +1,7 @@
 # CeilingFan
 
 ![License](https://img.shields.io/badge/license-MIT-blue "License")
+[![CodeFactor](https://www.codefactor.io/repository/github/adamjhowell/ceilingfan/badge)](https://www.codefactor.io/repository/github/adamjhowell/ceilingfan)
 
 <https://github.com/AdamJHowell/CeilingFan>
 
