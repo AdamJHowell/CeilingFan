@@ -23,16 +23,16 @@ When messages are published to that topic, this device will receive those messag
 | Item                                                                                                                                                           |  Cost | Quantity |  Total |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------|------:|----------|-------:|
 | [HiLetgo](http://www.hiletgo.com/) [ESP8266 NodeMCU ESP-12E](https://smile.amazon.com/gp/product/B010O1G1ES/)                                                  |  7.99 | 1        |   7.99 |
+| [HiLetgo](http://www.hiletgo.com/) [PCA9685](https://www.amazon.com/dp/B07BRS249H)                                                                             | 13.99 | 1        |  13.99 |
+| [Tobsun EA15-5V buck converter](https://www.amazon.com/dp/B00J3MHRNO)                                                                                          |  9.59 | 1        |   9.59 |
+| [12v 30a Dc Universal Regulated Switching Power Supply](https://www.amazon.com/dp/B00D7CWSCG)                                                                  |  9.59 | 1        |   9.59 |
 | [ELEGOO 4 channel 5v relay module](https://smile.amazon.com/ELEGOO-Channel-Optocoupler-Compatible-Raspberry/dp/B09ZQS2JRD/)                                    |  7.99 | 1        |   7.99 |
 | [Hobby King HK450 CCPM radio-controlled helicopter](https://hobbyking.com/en_us/hk450-ccpm-3d-helicopter-kit-align-t-rex-compat-ver-2.html) (T-rex clone)      | 39.06 | 1        |  39.06 |
 | [Turnigy Typhoon 450H 2215H Heli Motor 3550kv](https://hobbyking.com/en_us/turnigy-typhoon-450h-2215h-heli-motor-3550kv-450-class.html)                        | 13.75 | 1        |  13.75 |
 | [Hobbyking SS Series 25-30A ESC](https://hobbyking.com/en_us/hobbyking-ss-series-25-30a-esc.html)                                                              |  7.70 | 1        |   7.70 |
 | [Corona 919MG Digital Metal Gear Servo](https://hobbyking.com/en_us/corona-919mg-digital-metal-gear-servo-1-7kg-0-06sec-12g.html)                              |  7.09 | 4        |  28.36 |
-| [Antec NEO480 PSU](https://www.newegg.com/antec-neopower-480-480w/p/N82E16817103924) (or any spare PSU you have)                                               | 80.00 | 1        |  80.00 |
-| [Electronics-Salon 24/20-pin ATX DC Power Supply Breakout Board Module](https://www.amazon.com/Electronics-Salon-20-pin-Supply-Breakout-Module/dp/B01NBU2C64/) | 12.99 | 1        |  12.99 |
 | Hookup wire (various)                                                                                                                                          |  2.00 | 1        |   2.00 |
-| ~~[ARCELI L293D NodeMCU motor shield](https://www.amazon.com/ESP8266-NodeMCU-2-Channel-H-Bridge-ESP-12E/dp/B07KF9K293)~~ - No longer used                      | 13.30 | 0        |   0.00 |
-| Total                                                                                                                                                          |       |          | 199.84 |
+| Total                                                                                                                                                          |       |          | ???.?? |
 
 ESP8266 boards commonly have two different widths between rows of pins: 0.9" (23mm) and 1.1" (28mm). When purchasing a NodeMCU board holder (or motor shield), ensure the width of the shield matches the width of your ESP.
 
