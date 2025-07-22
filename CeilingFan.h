@@ -17,7 +17,6 @@
 #include <Servo.h>						 // The built-in servo library.
 #include <Wire.h>							 // The built-in I2C library.
 #include <WiFiClient.h>					 // Provides the WiFiClient class needed for MQTT.
-#include "SuperServo.h"					 // My upgraded Servo class.
 
 
 /**
@@ -111,14 +110,23 @@ const int LED_ON = 1;
 const int LED_OFF = 0;
 
 /**
- * Initial servo positions.
+ * Servo variables and initial positions.
  */
 int throttlePos = 0;
 const int escArmValue = 10; // The value to send to the ESC in order to "arm" it.
 int rudderPos = 90;
+int collective = 90;
 int collective1Pos = 90;
 int collective2Pos = 90;
 int collective3Pos = 90;
+
+/**
+ * LED variables and initial states.
+ */
+bool TLOF = false; // The Touchdown Liftoff lights are off by default.
+bool FATO = false; // The Final Approach Takeoff lights are off by default.
+bool floodlightStatus = false; // The floodlights are off by default.
+bool killswitchStatus = false; // The killswitch is off by default.
 
 /**
  * Other Globals

@@ -13,127 +13,94 @@
  */
 void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 {
-  Serial.printf( "New message on topic '%s'\n", topic );
-	// ToDo: Determine which commands this device should respond to.
+	Serial.printf( "New message on topic '%s'\n", topic );
 	if( length > 0 )
 	{
 		callbackCount++;
 		StaticJsonDocument<JSON_DOC_SIZE> callbackJsonDoc;
-		deserializeJson( callbackJsonDoc, payload, length );
-
-		// Available commands are: TakePicture and publishStats.
-		const char *command = callbackJsonDoc["command"];
-		if( strcmp( command, "TakePicture" ) == 0 )
+		DeserializationError error = deserializeJson( callbackJsonDoc, payload, length );
+		if (error)
 		{
-			Serial.println( "TakePicture command processed." );
+			Serial.print( F( "deserializeJson() failed: " ) );
+			Serial.println( error.c_str() );
+			return;
 		}
-		else if( strcmp( command, "publishStats" ) == 0 )
-			publishStats();
+
+		// Check if the "throttle" property exists and is an integer.
+		if( callbackJsonDoc["throttle"].is<int>() )
+		{
+			throttlePos = callbackJsonDoc["throttle"].as<int>();
+			Serial.print( "Throttle Position: " );
+			Serial.println( throttlePos );
+		}
 		else
-			Serial.printf( "Unknown command: '%s'\n", command );
-	}
-	// ToDo: Fix all of this to use the block above!!!
-	for( unsigned int i = 0; i < length; i++ )
-	{
-		char receivedKey = ( char )payload[i];
-		Serial.println( receivedKey );
+			Serial.println( "Throttle property is absent or not an integer." );
 
-		if( receivedKey == 't' ) // Process throttle changes.
+		// Check if the "collective" property exists and is an integer.
+		if( callbackJsonDoc["collective"].is<int>() )
 		{
-			if( length > 1 )
-			{
-				// Store the 0-9 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				throttleChange( receivedValue - '0' );
-			}
+			collective = callbackJsonDoc["collective"].as<int>();
+			Serial.print( "Collective Position: " );
+			Serial.println( collective );
 		}
-		else if( receivedKey == 'c' ) // Process collective changes.
+		else
+			Serial.println( "Collective property is absent or not an integer." );
+
+		// Check if the "rudder" property exists and is an integer.
+		if( callbackJsonDoc["rudder"].is<int>() )
 		{
-			if( length > 1 )
-			{
-				// Store the 1-9 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				collectiveChange( receivedValue - '0' );
-			}
+			rudderPos = callbackJsonDoc["rudder"].as<int>();
+			Serial.print( "Rudder Position: " );
+			Serial.println( rudderPos );
 		}
-		else if( receivedKey == 'r' ) // Process rudder changes.
+		else
+			Serial.println( "Rudder property is absent or not an integer." );
+
+		// Check if the "floodlight" property exists and is a boolean.
+		if( callbackJsonDoc["floodlight"].is<bool>() )
 		{
-			if( length > 1 )
-			{
-				// Store the 1-9 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				rudderChange( receivedValue - '0' );
-			}
+			floodlightStatus = callbackJsonDoc["floodlight"].as<bool>();
+			Serial.print( "Floodlight status: ");
+			Serial.println( floodlightStatus ? "true" : "false");
 		}
-		else if( receivedKey == 'f' ) // Process floodlight changes.
+		else
+			Serial.println( "Floodlight property is absent or not a boolean. Not assigned to floodlightStatus." );
+
+		// Check if the "killswitch" property exists and is a boolean.
+		if( callbackJsonDoc["killswitch"].is<bool>() )
 		{
-			if( length > 1 )
-			{
-				// Store the 0-1 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				floodLightChange( receivedValue - '0' );
-			}
+			killswitchStatus = callbackJsonDoc["killswitch"].as<bool>();
+			Serial.print( "killswitch status: ");
+			Serial.println( killswitchStatus ? "true" : "false");
 		}
-		else if( receivedKey == 'l' ) // Process green TLOF circle LED changes.
+		else
+			Serial.println( "Floodlight property is absent or not a boolean. Not assigned to killswitchStatus." );
+
+		// Check if the "TLOF" property exists and is a boolean.
+		if( callbackJsonDoc["TLOF"].is<bool>() )
 		{
-			if( length > 1 )
-			{
-				// Store the 0-1 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				tlofLightChange( receivedValue - '0' );
-			}
+			TLOF = callbackJsonDoc["TLOF"].as<bool>();
+			Serial.print( "TLOF status: ");
+			Serial.println( TLOF ? "true" : "false");
 		}
-		else if( receivedKey == 'a' ) // Process white FATO square LED changes.
+		else
+			Serial.println( "Floodlight property is absent or not a boolean. Not assigned to TLOF." );
+
+		// Check if the "FATO" property exists and is a boolean.
+		if( callbackJsonDoc["FATO"].is<bool>() )
 		{
-			if( length > 1 )
-			{
-				// Store the 0-1 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				fatoLightChange( receivedValue - '0' );
-			}
+			FATO = callbackJsonDoc["FATO"].as<bool>();
+			Serial.print( "FATO status: ");
+			Serial.println( FATO ? "true" : "false");
 		}
-		else if( receivedKey == 'c' ) // Process collective changes.
-		{
-			if( length > 1 )
-			{
-				// Store the 1-9 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				collectiveChange( receivedValue - '0' );
-			}
-		}
-		else if( receivedKey == 'k' ) // Kill switch!
-		{
-			// Turn everything off.
-			killSwitch();
-		}
+		else
+			Serial.println( "Floodlight property is absent or not a boolean. Not assigned to FATO." );
 	}
 } // End of onReceiveCallback() function.
 
 
 /**
  * @brief configureOTA() will configure and initiate Over The Air (OTA) updates for this device.
- *
  */
 void configureOTA()
 {

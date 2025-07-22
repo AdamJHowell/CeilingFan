@@ -12,6 +12,9 @@ include_directories( .
 		C:/Code/Arduino/libraries/ArduinoJson/
 		C:/Code/Arduino/libraries/PubSubClient/src/
 		C:/Code/Arduino/libraries/Adafruit_PWM_Servo_Driver_Library/
+		C:/Users/adam.howell/Documents/Arduino/libraries/ArduinoJson/
+		C:/Users/adam.howell/Documents/Arduino/libraries/PubSubClient/src/
+		C:/Users/adam.howell/Documents/Arduino/libraries/Adafruit_PWM_Servo_Driver_Library/
 		"C:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino/"
 		"C:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/7.3.0/include/"
 		C:/Users/Adam/AppData/Local/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include/
@@ -24,7 +27,6 @@ add_executable( CeilingFan
 		NetworkFunctions.ino
 		CeilingFan.h
 		privateInfo.h
-		ServoFunctions.ino
-		SuperServo.ino SuperServo.h )
+		ServoFunctions.ino )
 
 set_target_properties( CeilingFan PROPERTIES LINKER_LANGUAGE CXX )

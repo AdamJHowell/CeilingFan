@@ -19,7 +19,7 @@ BreakBeforeBraces: Allman
 IndentCaseLabels: true
 MaxEmptyLinesToKeep: 2
 PointerAlignment: Right
-ReflowComments: false
+ReflowComments: IndentOnly
 SortIncludes: Never
 
 SpaceAfterCStyleCast: false

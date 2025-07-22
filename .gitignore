@@ -6,8 +6,6 @@ debug_custom.json
 
 cmake-build-*/
 .vscode/
-.idea/
-privateInfo.*
 
 #################
 ## Project-specific
